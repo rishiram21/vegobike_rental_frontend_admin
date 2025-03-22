@@ -364,7 +364,8 @@ const StoreMaster = () => {
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                 <tr>
-                  <th scope="col" className="px-6 py-3">ID</th>
+                  <th scope="col" className="px-6 py-3">S.No.</th>
+                  {/* <th scope="col" className="px-6 py-3">ID</th> */}
                   <th scope="col" className="px-6 py-3">Store Image</th>
                   <th scope="col" className="px-6 py-3">Store Name</th>
                   <th scope="col" className="px-6 py-3">Contact Number</th>
@@ -375,23 +376,24 @@ const StoreMaster = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-4">
+                    <td colSpan="7" className="text-center py-4">
                       Loading...
                     </td>
                   </tr>
                 ) : data.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-4">
+                    <td colSpan="7" className="text-center py-4">
                       No data found
                     </td>
                   </tr>
                 ) : (
-                  currentData.map((store) => (
+                  currentData.map((store, index) => (
                     <tr
                       key={store.id}
                       className="bg-white border-b hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4">{store.id}</td>
+                      <td className="px-6 py-4">{indexOfFirstItem + index + 1}</td>
+                      {/* <td className="px-6 py-4">{store.id}</td> */}
                       <td className="px-6 py-4">
                         {store.image ? (
                           <img
@@ -428,18 +430,25 @@ const StoreMaster = () => {
                             <FaEdit className="mr-2" />
                             Edit
                           </button>
-                          <button
+                          {/* <button
                             className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 rounded"
                             onClick={() => setConfirmDeleteId(store.id)}
                           >
                             <FaTrash />
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan="7" className="px-6 py-4 text-right">
+                    <strong>Total Stores: {currentData.length} </strong>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
           {confirmDeleteId && (
@@ -513,4 +522,3 @@ const StoreMaster = () => {
 };
 
 export default StoreMaster;
-

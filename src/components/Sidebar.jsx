@@ -5,6 +5,7 @@ import { RiMotorbikeLine } from "react-icons/ri";
 import { Link, useLocation } from "react-router-dom";
 import { MdOutlineLocalGroceryStore } from "react-icons/md";
 import { TbBrandBooking, TbReportSearch } from "react-icons/tb";
+import Header from "./Header";
 
 const Sidebar = () => {
   const [activeLink, setActiveLink] = useState(0);
@@ -127,7 +128,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Responsive Header Bar */}
-      <div className="fixed top-0 left-0 z-30 w-full bg-blue-900 flex justify-between items-center px-4 py-3">
+      <div className="fixed h-20 top-0 left-0 z-30 w-full bg-blue-900 flex justify-between items-center px-4 py-4">
         <div className="flex items-center">
           <button
             onClick={windowWidth < 768 ? toggleMenu : toggleDesktopSidebar}
@@ -154,6 +155,7 @@ const Sidebar = () => {
         {/* Add responsive header actions here if needed */}
         <div className="flex items-center">
           {/* Example: User profile or notification icons */}
+          <Header></Header>
         </div>
       </div>
 
@@ -174,7 +176,7 @@ const Sidebar = () => {
                     pt-16
                     ${isMenuOpen ? 'w-3/4 sm:w-64' : 'w-0'}`}
       >
-        <div className="flex-grow overflow-y-auto overflow-x-hidden scrollbar-hide">
+        <div className="flex-grow py-10 overflow-y-auto overflow-x-hidden scrollbar-hide">
           <div className="py-2 px-2">
             <ul className="space-y-1">
               {SIDEBAR_LINKS.map((link, index) => (
