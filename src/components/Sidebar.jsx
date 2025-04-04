@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { IoLayersOutline, IoPricetagsOutline } from "react-icons/io5";
 import { LuBox, LuUsers2, LuChevronRight, LuMenu } from "react-icons/lu";
 import { RiMotorbikeLine } from "react-icons/ri";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MdOutlineLocalGroceryStore } from "react-icons/md";
 import { TbBrandBooking, TbReportSearch } from "react-icons/tb";
 import Header from "./Header";
@@ -12,6 +12,7 @@ const Sidebar = () => {
   const [openSubmenus, setOpenSubmenus] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -74,10 +75,19 @@ const Sidebar = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  const handleLinkClick = (index) => {
+  const handleLinkClick = (index, path) => {
     setActiveLink(index);
     if (windowWidth < 768) {
       setIsMenuOpen(false);
+    }
+    
+    // Check if we're already on the same path
+    if (path && path === location.pathname) {
+      // Reload the page
+      window.location.reload();
+    } else if (path) {
+      // Normal navigation
+      navigate(path);
     }
   };
 
@@ -185,7 +195,10 @@ const Sidebar = () => {
                     <Link
                       to={link.path}
                       className={`flex items-center py-3 px-3 rounded-lg hover:bg-indigo-700 ${activeLink === index ? 'bg-indigo-600 text-white' : 'text-indigo-100'}`}
-                      onClick={() => handleLinkClick(index)}
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent default Link behavior
+                        handleLinkClick(index, link.path);
+                      }}
                     >
                       <div className={`flex items-center ${isDesktopCollapsed && windowWidth >= 768 ? 'justify-center' : ''}`}>
                         <span className="text-xl">{link.icon && React.createElement(link.icon, { size: isDesktopCollapsed && windowWidth >= 768 ? 22 : 18 })}</span>
@@ -221,7 +234,10 @@ const Sidebar = () => {
                               key={subitem.id}
                               to={subitem.path}
                               className="block py-2 px-3 text-sm text-indigo-200 hover:text-white rounded hover:bg-indigo-700/50 transition-colors whitespace-nowrap"
-                              onClick={() => handleLinkClick(index)}
+                              onClick={(e) => {
+                                e.preventDefault(); // Prevent default Link behavior
+                                handleLinkClick(index, subitem.path);
+                              }}
                             >
                               {subitem.name}
                             </Link>
@@ -237,7 +253,10 @@ const Sidebar = () => {
                               key={subitem.id}
                               to={subitem.path}
                               className="hidden group-hover:block absolute left-full top-0 ml-2 px-4 py-2 bg-blue-800 text-white rounded shadow-lg whitespace-nowrap"
-                              onClick={() => handleLinkClick(index)}
+                              onClick={(e) => {
+                                e.preventDefault(); // Prevent default Link behavior
+                                handleLinkClick(index, subitem.path);
+                              }}
                             >
                               {subitem.name}
                             </Link>
@@ -253,7 +272,6 @@ const Sidebar = () => {
         </div>
 
         {/* Optional: Footer for sidebar - Fixed to properly hide on mobile */}
-        {/* Only show footer in desktop expanded view OR in mobile view but not collapsed */}
         {((windowWidth >= 768 && !isDesktopCollapsed) || (windowWidth < 768 && isMenuOpen)) && (
           <div className="p-4 border-t border-indigo-800">
             <div className="text-xs text-indigo-300 text-center">

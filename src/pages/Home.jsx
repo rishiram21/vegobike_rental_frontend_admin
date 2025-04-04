@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import apiClient from "../api/apiConfig"; // Ensure you use the configured Axios instance
+import { useSpring, animated, config } from 'react-spring';
+import { useTable } from 'react-table';
+import apiClient from "../api/apiConfig";
 
 const Home = () => {
   const [users, setUsers] = useState([]);
@@ -16,16 +17,13 @@ const Home = () => {
   const [showBikes, setShowBikes] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     const fetchUsers = async () => {
       setLoading(true);
       try {
         const response = await apiClient.get("/users/all", {
-          params: {
-            page: currentPage,
-            size: 5,
-            sortBy: 'id',
-            sortDirection: 'asc'
-          }
+          params: { page: currentPage, size: 5, sortBy: 'id', sortDirection: 'asc' }
         });
         setUsers(response.data.content);
         setTotalPages(response.data.totalPages);
@@ -124,383 +122,271 @@ const Home = () => {
     // Implement logic to view unverified users
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Animated counter component
+  const AnimatedCounter = ({ value }) => {
+    const { number } = useSpring({
+      from: { number: 0 },
+      number: value,
+      delay: 200,
+      config: config.molasses,
+    });
+    
+    return <animated.span>{number.to(n => Math.floor(n))}</animated.span>;
+  };
+  
+  // Card entry animation
+  const fadeInUp = useSpring({
+    from: { opacity: 0, transform: 'translateY(20px)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+    config: { tension: 300, friction: 20 },
+  });
+
+  // Table entry animation
+  const tableAnimation = useSpring({ 
+    from: { opacity: 0, transform: 'scale(0.95)' },
+    to: { opacity: 1, transform: 'scale(1)' },
+    config: { tension: 280, friction: 18 },
+  });
+
+  const Table = ({ columns, data }) => {
+    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data });
+
+    return (
+      <animated.div style={tableAnimation} className="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+        <table {...getTableProps()} className="w-full text-sm text-left text-gray-700">
+          <thead className="text-xs text-white uppercase bg-blue-900">
+            {headerGroups.map(headerGroup => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map(column => (
+                  <th {...column.getHeaderProps()} className="px-4 py-3">{column.render('Header')}</th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody {...getTableBodyProps()} className="divide-y divide-gray-200">
+            {rows.map((row, rowIndex) => {
+              prepareRow(row);
+              return (
+                <tr {...row.getRowProps()} className={`${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150`}>
+                  {row.cells.map(cell => (
+                    <td {...cell.getCellProps()} className="px-4 py-3">{cell.render('Cell')}</td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </animated.div>
+    );
+  };
+
   return (
-    <div className="p-4 bg-gray-100 min-h-screen mt-16 overflow-hidden">
+    <div className="p-4 bg-gray-100 min-h-screen overflow-hidden">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
-          <div
-            key={index}
-            className={`p-4 rounded-lg shadow-md text-white ${stat.color}`}
+          <animated.div 
+            key={index} 
+            style={{ ...fadeInUp, delay: index * 100 }} 
+            className={`p-4 rounded-lg shadow-md text-white ${stat.color} transform transition-all duration-300 hover:scale-105`}
           >
-            <h2 className="text-2xl font-bold sm:text-3xl">{stat.count}</h2>
-            <p className="mt-2 text-lg">{stat.title}</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">
+              <AnimatedCounter value={stat.count} />
+            </h2>
+            <p className="mt-2 text-lg font-medium">{stat.title}</p>
             {stat.title === "Total Users" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewAllUsers}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllUsers}>
                 {showUsers ? "Hide Users" : "View All"}
               </button>
             )}
             {stat.title === "Total Bookings" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewAllBookings}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllBookings}>
                 {showBookings ? "Hide Bookings" : "View All"}
               </button>
             )}
             {stat.title === "Total Stores" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewAllStores}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllStores}>
                 {showStores ? "Hide Stores" : "View All"}
               </button>
             )}
             {stat.title === "Total Bikes" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewAllBikes}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllBikes}>
                 {showBikes ? "Hide Bikes" : "View All"}
               </button>
             )}
             {stat.title === "Today's Bookings" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewTodaysBookings}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewTodaysBookings}>
                 View All
               </button>
             )}
             {stat.title === "Ongoing Bookings" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewOngoingBookings}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewOngoingBookings}>
                 View All
               </button>
             )}
             {stat.title === "Total Verified Users" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewVerifiedUsers}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewVerifiedUsers}>
                 View All
               </button>
             )}
             {stat.title === "Total Unverified Users" && (
-              <button
-                className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full"
-                onClick={handleViewUnverifiedUsers}
-              >
+              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewUnverifiedUsers}>
                 View All
               </button>
             )}
-          </div>
+          </animated.div>
         ))}
       </div>
 
-      {/* Display User Data */}
       {showUsers && (
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4">All Users</h2>
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">All Users</h2>
           {loading ? (
-            <p>Loading...</p>
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-900"></div>
+            </div>
           ) : (
-            <div className="relative overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-500">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                  <tr>
-                    <th scope="col" className="px-4 py-2">ID</th>
-                    <th scope="col" className="px-4 py-2">Name</th>
-                    <th scope="col" className="px-4 py-2">Email ID</th>
-                    <th scope="col" className="px-4 py-2">Contact Number</th>
-                    <th scope="col" className="px-4 py-2">Aadhar Front</th>
-                    <th scope="col" className="px-4 py-2">Aadhar Back</th>
-                    <th scope="col" className="px-4 py-2">Driving License</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id} className="bg-white border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{user.id}</td>
-                      <td className="px-4 py-3">{user.name}</td>
-                      <td className="px-4 py-3">{user.email}</td>
-                      <td className="px-4 py-3">{user.phoneNumber}</td>
-                      <td className="px-4 py-3">
-                        <img
-                          src={`data:image/jpeg;base64,${user.aadharFrontSide}`}
-                          alt="Aadhar Front"
-                          className="w-12 h-12 object-cover"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <img
-                          src={`data:image/jpeg;base64,${user.aadharBackSide}`}
-                          alt="Aadhar Back"
-                          className="w-12 h-12 object-cover"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <img
-                          src={`data:image/jpeg;base64,${user.drivingLicense}`}
-                          alt="Driving License"
-                          className="w-12 h-12 object-cover"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Pagination Controls */}
+            <>
+              <Table
+                columns={[
+                  { Header: 'ID', accessor: 'id' },
+                  { Header: 'Name', accessor: 'name' },
+                  { Header: 'Email ID', accessor: 'email' },
+                  { Header: 'Contact Number', accessor: 'phoneNumber' },
+                  { Header: 'Aadhar Front', accessor: 'aadharFrontSide', Cell: ({ value }) => <img src={`data:image/jpeg;base64,${value}`} alt="Aadhar Front" className="w-12 h-12 object-cover rounded" /> },
+                  { Header: 'Aadhar Back', accessor: 'aadharBackSide', Cell: ({ value }) => <img src={`data:image/jpeg;base64,${value}`} alt="Aadhar Back" className="w-12 h-12 object-cover rounded" /> },
+                  { Header: 'Driving License', accessor: 'drivingLicense', Cell: ({ value }) => <img src={`data:image/jpeg;base64,${value}`} alt="Driving License" className="w-12 h-12 object-cover rounded" /> },
+                ]}
+                data={users}
+              />
               <div className="flex justify-between items-center mt-4">
                 <p className="text-sm text-gray-500">
                   Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, users.length)} of {users.length} entries
                 </p>
                 <div className="flex space-x-2">
-                  <button
-                    className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    disabled={currentPage === 0}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                  >
+                  <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
                     Previous
                   </button>
                   {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index}
-                      className={`px-3 py-1 rounded ${
-                        currentPage === index
-                          ? "bg-blue-900 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                      onClick={() => setCurrentPage(index)}
-                    >
+                    <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                       {index + 1}
                     </button>
                   ))}
-                  <button
-                    disabled={currentPage === totalPages - 1}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === totalPages - 1
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-900 text-white hover:bg-blue-600"
-                    }`}
-                  >
+                  <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
                     Next
                   </button>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       )}
 
-      {/* Display Booking Data */}
       {showBookings && (
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4">All Bookings</h2>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                <tr>
-                  <th scope="col" className="px-4 py-2">User ID</th>
-                  <th scope="col" className="px-4 py-2">Booking ID</th>
-                  <th scope="col" className="px-4 py-2">Vehicle</th>
-                  <th scope="col" className="px-4 py-2">Start Date</th>
-                  <th scope="col" className="px-4 py-2">End Date</th>
-                  <th scope="col" className="px-4 py-2">Total Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((item) => (
-                  <tr key={item.bookingId} className="border-b bg-white hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{item.userId}</td>
-                    <td className="px-4 py-3">{item.bookingId}</td>
-                    <td className="px-4 py-3">{item.vehicle}</td>
-                    <td className="px-4 py-3">{item.startDate}</td>
-                    <td className="px-4 py-3">{item.endDate}</td>
-                    <td className="px-4 py-3">{item.totalAmount}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination Controls */}
-            <div className="flex justify-between items-center mt-4">
-                <p className="text-sm text-gray-500">
-                  Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, users.length)} of {users.length} entries
-                </p>
-                <div className="flex space-x-2">
-                  <button
-                    className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    disabled={currentPage === 0}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                  >
-                    Previous
-                  </button>
-                  {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index}
-                      className={`px-3 py-1 rounded ${
-                        currentPage === index
-                          ? "bg-blue-900 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                      onClick={() => setCurrentPage(index)}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                  <button
-                    disabled={currentPage === totalPages - 1}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === totalPages - 1
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-900 text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">All Bookings</h2>
+          <Table
+            columns={[
+              { Header: 'User ID', accessor: 'userId' },
+              { Header: 'Booking ID', accessor: 'bookingId' },
+              { Header: 'Vehicle', accessor: 'vehicle' },
+              { Header: 'Start Date', accessor: 'startDate' },
+              { Header: 'End Date', accessor: 'endDate' },
+              { Header: 'Total Amount', accessor: 'totalAmount', Cell: ({ value }) => `₹${value}` },
+            ]}
+            data={bookings}
+          />
+          <div className="flex justify-between items-center mt-4">
+            <p className="text-sm text-gray-500">
+              Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, bookings.length)} of {bookings.length} entries
+            </p>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                  {index + 1}
+                </button>
+              ))}
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Display Store Data */}
       {showStores && (
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4">All Stores</h2>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                <tr>
-                  <th scope="col" className="px-4 py-2">ID</th>
-                  <th scope="col" className="px-4 py-2">Store Name</th>
-                  <th scope="col" className="px-4 py-2">Location</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stores.map((store) => (
-                  <tr key={store.id} className="bg-white border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">{store.id}</td>
-                    <td className="px-4 py-3">{store.name}</td>
-                    <td className="px-4 py-3">{store.address}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination Controls */}
-            <div className="flex justify-between items-center mt-4">
-                <p className="text-sm text-gray-500">
-                  Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, users.length)} of {users.length} entries
-                </p>
-                <div className="flex space-x-2">
-                  <button
-                    className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    disabled={currentPage === 0}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                  >
-                    Previous
-                  </button>
-                  {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index}
-                      className={`px-3 py-1 rounded ${
-                        currentPage === index
-                          ? "bg-blue-900 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                      onClick={() => setCurrentPage(index)}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                  <button
-                    disabled={currentPage === totalPages - 1}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === totalPages - 1
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-900 text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">All Stores</h2>
+          <Table
+            columns={[
+              { Header: 'ID', accessor: 'id' },
+              { Header: 'Store Name', accessor: 'name' },
+              { Header: 'Location', accessor: 'address' },
+            ]}
+            data={stores}
+          />
+          <div className="flex justify-between items-center mt-4">
+            <p className="text-sm text-gray-500">
+              Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, stores.length)} of {stores.length} entries
+            </p>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                  {index + 1}
+                </button>
+              ))}
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Display Bike Data */}
       {showBikes && (
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4">All Bikes</h2>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-200">
-                <tr>
-                  <th scope="col" className="px-4 py-2">ID</th>
-                  <th scope="col" className="px-4 py-2">Vehicle Number</th>
-                  <th scope="col" className="px-4 py-2">Model</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bikes.map((bike) => (
-                  <tr key={bike.id} className="bg-white border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">{bike.id}</td>
-                    <td className="px-4 py-3">{bike.vehicleRegistrationNumber}</td>
-                    <td className="px-4 py-3">{bike.model}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination Controls */}
-            <div className="flex justify-between items-center mt-4">
-                <p className="text-sm text-gray-500">
-                  Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, users.length)} of {users.length} entries
-                </p>
-                <div className="flex space-x-2">
-                  <button
-                    className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    disabled={currentPage === 0}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                  >
-                    Previous
-                  </button>
-                  {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index}
-                      className={`px-3 py-1 rounded ${
-                        currentPage === index
-                          ? "bg-blue-900 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                      onClick={() => setCurrentPage(index)}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                  <button
-                    disabled={currentPage === totalPages - 1}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === totalPages - 1
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-900 text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">All Bikes</h2>
+          <Table
+            columns={[
+              { Header: 'ID', accessor: 'id' },
+              { Header: 'Vehicle Number', accessor: 'vehicleRegistrationNumber' },
+              { Header: 'Model', accessor: 'model' },
+            ]}
+            data={bikes}
+          />
+          <div className="flex justify-between items-center mt-4">
+            <p className="text-sm text-gray-500">
+              Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, bikes.length)} of {bikes.length} entries
+            </p>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                  {index + 1}
+                </button>
+              ))}
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      <button onClick={scrollToTop} className="fixed bottom-4 right-4 bg-blue-900 text-white p-3 rounded-full shadow-md hover:bg-blue-600 transition-all duration-200 hover:scale-110">
+        ↑
+      </button>
     </div>
   );
 };

@@ -34,13 +34,7 @@ const Header = () => {
          
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            <a href="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors flex items-center">
-              <FaTachometerAlt className="mr-2" />
-              Dashboard
-            </a>
-           
-          </nav>
+          
 
           {/* Right Side Icons */}
           <div className="flex items-center space-x-4">

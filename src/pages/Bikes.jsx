@@ -5,10 +5,15 @@ import { BASE_URL } from "../api/api";
 import apiClient from "../api/apiConfig";
 
 function convertImageToBase64(file) {
+  console.log(file);
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
     reader.readAsDataURL(file);
   });
 }
@@ -18,18 +23,20 @@ const Bikes = () => {
   const [statuses, setStatuses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [formVisible, setFormVisible] = useState(false);
+  const [formVisible, setFormVisible] = useState(false); //FORM State
   const [editingId, setEditingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [brands, setBrands] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [models, setModels] = useState([]);
-  const [stores, setStores] = useState([]);
-  const [fuel, setFuel] = useState([]);
+  const [brands, setBrands] = useState([]); //for the brands
+  const [categories, setCategories] = useState([]); //for the categories
+  const [models, setModels] = useState([]); //for the models
+  const [stores, setStores] = useState([]); //for the stores
+  const [fuel, setFuel] = useState([]); //for the fule
+
   const [loading, setLoading] = useState(true);
-  const [itemsPerPage] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-  const [errors, setErrors] = useState({});
+  const [itemsPerPage] = useState(7);
+  const [cities, setCities] = useState([]); // New state for cities
+  const [subcities, setSubcities] = useState([]); // State for subcities/areas
+  const [totalPages, setTotalPages] = useState(1); // Keep track of total pages
 
   const [formData, setFormData] = useState({
     vehicleBrandId: "",
@@ -42,10 +49,10 @@ const Bikes = () => {
     engineNumber: "",
     fuelType: "",
     vehicleStatus: "",
-    pucPdfFile: null,
-    insurancePdfFile: null,
-    documentPdfFile: null,
-    image: null,
+    pucPdfFile: "",
+    insurancePdfFile: "",
+    documentPdfFile: "",
+    image: "",
   });
 
   const fetchBikes = async () => {
@@ -58,7 +65,18 @@ const Bikes = () => {
         },
       });
       setData(response.data.content);
-      setTotalPages(response.data.totalPages);
+      setStatuses(
+        response.data.content.map((item) => ({
+          id: item.id,
+          status: "AVILABLE",
+        }))
+      );
+      if (response.data && response.data.content) {
+        setData(response.data.content);
+        setTotalPages(response.data.totalPages);
+      } else {
+        console.error("Invalid response format");
+      }
     } catch (error) {
       console.error("Error fetching bike data:", error);
     } finally {
@@ -66,45 +84,22 @@ const Bikes = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.vehicleBrandId) newErrors.vehicleBrandId = "Brand Name is required";
-    if (!formData.vehicleModelId) newErrors.vehicleModelId = "Model Name is required";
-    if (!formData.vehicleCategoryId) newErrors.vehicleCategoryId = "Category Name is required";
-    if (!formData.vehicleRegistrationNumber) newErrors.vehicleRegistrationNumber = "Vehicle Registration Number is required";
-    if (!formData.registrationYear) newErrors.registrationYear = "Registration Year is required";
-    if (!formData.storeId) newErrors.storeId = "Store Name is required";
-    if (!formData.pucPdfFile) newErrors.pucPdfFile = "PUC PDF is required";
-    if (!formData.insurancePdfFile) newErrors.insurancePdfFile = "Insurance PDF is required";
-    if (!formData.documentPdfFile) newErrors.documentPdfFile = "Document PDF is required";
-    if (!formData.image) newErrors.image = "Vehicle Image is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleAddBike = (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
-    const formDataToSend = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key]) {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
-
     apiClient
-      .post("/vehicle/add", formDataToSend, {
+      .post("/vehicle/add", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       })
       .then((response) => {
-        setData([...data, response.data]);
+        if (!Array.isArray(data)) {
+          console.error("Data is not an array. Resetting to an empty array.");
+          setData([response.data]);
+        } else {
+          setData([...data, response.data]);
+        }
         resetForm();
-
-        window.location.reload();
       })
       .catch((error) => {
         console.error("Error Adding Bike Data", error);
@@ -120,9 +115,11 @@ const Bikes = () => {
         alert("File size should not exceed 3 MB");
         return;
       }
+
+      console.log(file, e.target.name, "uploading files");
       setFormData({
         ...formData,
-        [e.target.name]: file,
+        [e?.target?.name]: file,
       });
     }
   };
@@ -158,7 +155,7 @@ const Bikes = () => {
 
   const fetchStores = async () => {
     try {
-      const response = await apiClient.get("/store/all");
+      const response = await axios.get("http://localhost:8080/store/all");
       setStores(response.data.content);
     } catch (error) {
       console.error("Error fetching stores data:", error);
@@ -167,33 +164,39 @@ const Bikes = () => {
 
   const fetchFuel = async () => {
     try {
-      const response = await apiClient.get("/fuel/all");
+      const response = await axios.get("");
       setFuel(response.data.content);
     } catch (error) {
-      console.error("Error fetching fuel data:", error);
+      console.error("Error fetching stores data:", error);
     }
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    console.log("Editing ID:", editingId);
 
-    const formDataToSend = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key]) {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+    let blob = new Blob([formData.pucPdfFile.fileContent], { type: "pdf" });
+    let file = new File([blob], { type: "pdf" });
+    let blob1 = new Blob([formData.insurancePdfFile.fileContent], { type: "pdf" });
+    let file1 = new File([blob1], { type: "pdf" });
+    let blob2 = new Blob([formData.documentPdfFile.fileContent], { type: "pdf" });
+    let file2 = new File([blob2], { type: "pdf" });
 
     try {
-      const response = await apiClient.put(`/vehicle/${editingId}`, formDataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.put(
+        `http://localhost:8080/vehicle/${editingId}`,
+        { ...formData, pucPdfFile: file, insurancePdfFile : file1,  documentPdfFile: file2},
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       setData((prevData) =>
         prevData.map((bike) => (bike.id === editingId ? response.data : bike))
       );
+
       resetForm();
     } catch (error) {
       console.error("Error saving data:", error);
@@ -222,8 +225,8 @@ const Bikes = () => {
   };
 
   const handleDeleteBike = (id) => {
-    apiClient
-      .delete(`/vehicle/${id}`)
+    axios
+      .delete(`http://localhost:8080/bike/${id}`)
       .then(() => setData(data.filter((bike) => bike.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => setConfirmDeleteId(null));
@@ -242,13 +245,12 @@ const Bikes = () => {
       engineNumber: "",
       fuelType: "",
       vehicleStatus: "",
-      pucPdfFile: null,
-      insurancePdfFile: null,
-      documentPdfFile: null,
-      image: null,
+      pucPdfFile: "",
+      insurancePdfFile: "",
+      documentPdfFile: "",
+      image: "",
     });
     setFormVisible(false);
-    setErrors({});
   };
 
   const filteredData = data.filter(
@@ -258,7 +260,7 @@ const Bikes = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentData = filteredData.slice(0, itemsPerPage);
 
   const toggleStatus = (id) => {
     setStatuses((prevStatuses) =>
@@ -280,17 +282,17 @@ const Bikes = () => {
     fetchCategory();
     fetchStores();
     fetchFuel();
-  }, [currentPage]);
+  }, [currentPage, itemsPerPage]);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen mt-14">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">All Bikes</h1>
+    <div className=" bg-gray-100 min-h-screen">
+      <div className="flex justify-between items-center mt-4 mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">All Bikes List</h1>
         {!formVisible && (
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded-r hover:bg-blue-600"
-          >
+            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+         >
             + Add Bike
           </button>
         )}
@@ -304,11 +306,10 @@ const Bikes = () => {
           <form onSubmit={editingId ? handleSaveEdit : handleAddBike}>
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">
-                  Brand Name <span className="text-red-500">*</span>
-                </label>
+                <label className="font-medium">Brand Name *</label>
                 <select
                   name="vehicleBrandId"
+                  placeholder="Enter Brand Name"
                   className="border p-2 rounded w-full"
                   value={formData.vehicleBrandId}
                   onChange={(e) => {
@@ -318,6 +319,7 @@ const Bikes = () => {
                     });
                     fetchModels(e.target.value);
                   }}
+                  required
                 >
                   <option value="">Select Brand</option>
                   {brands.map((brand) => (
@@ -326,22 +328,19 @@ const Bikes = () => {
                     </option>
                   ))}
                 </select>
-                {errors.vehicleBrandId && (
-                  <span className="text-red-500 text-sm">{errors.vehicleBrandId}</span>
-                )}
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">
-                  Model Name <span className="text-red-500">*</span>
-                </label>
+                <label className="font-medium">Model Name *</label>
                 <select
                   name="vehicleModelId"
+                  placeholder="Enter Model Name"
                   className="border p-2 rounded w-full"
-                  value={formData.vehicleModelId}
-                  onChange={(e) =>
+                  defaultValue={formData.vehicleModelId}
+                  onChange={(e) =>{
                     setFormData({ ...formData, vehicleModelId: e.target.value })
-                  }
+                  }}
                   disabled={!formData.vehicleBrandId}
+                  required
                 >
                   <option value="" disabled>
                     Select Model
@@ -352,16 +351,12 @@ const Bikes = () => {
                     </option>
                   ))}
                 </select>
-                {errors.vehicleModelId && (
-                  <span className="text-red-500 text-sm">{errors.vehicleModelId}</span>
-                )}
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">
-                  Category Name <span className="text-red-500">*</span>
-                </label>
+                <label className="font-medium">Category Name *</label>
                 <select
                   name="vehicleCategoryId"
+                  placeholder="Enter Brand Name"
                   className="border p-2 rounded w-full"
                   value={formData.vehicleCategoryId}
                   onChange={(e) =>
@@ -370,6 +365,7 @@ const Bikes = () => {
                       vehicleCategoryId: e.target.value,
                     })
                   }
+                  required
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (
@@ -378,13 +374,10 @@ const Bikes = () => {
                     </option>
                   ))}
                 </select>
-                {errors.vehicleCategoryId && (
-                  <span className="text-red-500 text-sm">{errors.vehicleCategoryId}</span>
-                )}
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="font-medium">
-                  Vehicle Registration Number <span className="text-red-500">*</span>
+                  Vehicle Registration Number *
                 </label>
                 <input
                   type="text"
@@ -398,15 +391,11 @@ const Bikes = () => {
                     })
                   }
                   className="border p-2 rounded w-full"
+                  required
                 />
-                {errors.vehicleRegistrationNumber && (
-                  <span className="text-red-500 text-sm">{errors.vehicleRegistrationNumber}</span>
-                )}
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">
-                  Registration Year <span className="text-red-500">*</span>
-                </label>
+                <label className="font-medium">Registration Year *</label>
                 <input
                   type="text"
                   name="registrationYear"
@@ -419,13 +408,11 @@ const Bikes = () => {
                     })
                   }
                   className="border p-2 rounded w-full"
+                  required
                 />
-                {errors.registrationYear && (
-                  <span className="text-red-500 text-sm">{errors.registrationYear}</span>
-                )}
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">Vehicle Chassis Number</label>
+                <label className="font-medium">Vehicle Chassis Number *</label>
                 <input
                   type="text"
                   name="chassisNumber"
@@ -438,10 +425,11 @@ const Bikes = () => {
                     })
                   }
                   className="border p-2 rounded w-full"
+                  required
                 />
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">Vehicle Engine Number</label>
+                <label className="font-medium">Vehicle Engine Number *</label>
                 <input
                   type="text"
                   name="engineNumber"
@@ -454,19 +442,20 @@ const Bikes = () => {
                     })
                   }
                   className="border p-2 rounded w-full"
+                  required
                 />
               </div>
               <div className="col-span-2 sm:col-span-1">
-                <label className="font-medium">
-                  Store Name <span className="text-red-500">*</span>
-                </label>
+                <label className="font-medium">Store Name *</label>
                 <select
                   name="storeId"
+                  placeholder="Enter Store Name"
                   className="border p-2 rounded w-full"
                   value={formData.storeId}
                   onChange={(e) =>
                     setFormData({ ...formData, storeId: e.target.value })
                   }
+                  required
                 >
                   <option value="">Select Store</option>
                   {stores.map((store) => (
@@ -475,57 +464,79 @@ const Bikes = () => {
                     </option>
                   ))}
                 </select>
-                {errors.storeId && (
-                  <span className="text-red-500 text-sm">{errors.storeId}</span>
-                )}
               </div>
 
               <div className="mb-4">
-                <label className="block mb-2 font-medium">
-                  Upload PUC <span className="text-red-500">*</span>
-                </label>
+                <label className="block mb-2 font-medium">Upload PUC</label>
                 <input
                   type="file"
                   name="pucPdfFile"
                   className="w-full border border-gray-300 p-2 rounded"
                   onChange={handleFileUpload}
+                  required
                 />
-                {errors.pucPdfFile && (
-                  <span className="text-red-500 text-sm">{errors.pucPdfFile}</span>
+                {formData.pucPdfFile && (
+                  <div className="mt-2">
+                    <div className="w-[90px] h-[90px] border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                      <img
+                        src={formData.pucPdfFile}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
 
               <div className="mb-4">
                 <label className="block mb-2 font-medium">
-                  Upload Insurance <span className="text-red-500">*</span>
+                  Upload Insurance
                 </label>
                 <input
                   type="file"
                   name="insurancePdfFile"
                   className="w-full border border-gray-300 p-2 rounded"
                   onChange={handleFileUpload}
+                  required
                 />
-                {errors.insurancePdfFile && (
-                  <span className="text-red-500 text-sm">{errors.insurancePdfFile}</span>
+                {formData.insurancePdfFile && (
+                  <div className="mt-2">
+                    <div className="w-[90px] h-[90px] border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                      <img
+                        src={formData.insurancePdfFile}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="mb-4">
                 <label className="block mb-2 font-medium">
-                  Upload Document (RC, Any) <span className="text-red-500">*</span>
+                  Upload Document
                 </label>
                 <input
                   type="file"
                   name="documentPdfFile"
                   className="w-full border border-gray-300 p-2 rounded"
                   onChange={handleFileUpload}
+                  required
                 />
-                {errors.documentPdfFile && (
-                  <span className="text-red-500 text-sm">{errors.documentPdfFile}</span>
+                {formData.documentPdfFile && (
+                  <div className="mt-2">
+                    <div className="w-[90px] h-[90px] border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                      <img
+                        src={formData.documentPdfFile}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
               <div className="mb-4">
                 <label className="block mb-2 font-medium">
-                  Upload Vehicle Images <span className="text-red-500">*</span>
+                  Upload Vehicle Images *
                 </label>
                 <input
                   type="file"
@@ -536,6 +547,7 @@ const Bikes = () => {
                     if (file) {
                       try {
                         const base64String = await convertImageToBase64(file);
+                        console.log("Base64:", base64String);
                         setFormData({
                           ...formData,
                           image: base64String,
@@ -545,9 +557,18 @@ const Bikes = () => {
                       }
                     }
                   }}
+                  required
                 />
-                {errors.image && (
-                  <span className="text-red-500 text-sm">{errors.image}</span>
+                {formData.image && (
+                  <div className="mt-2">
+                    <div className="w-[90px] h-[90px] border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                      <img
+                        src={formData.image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -570,13 +591,13 @@ const Bikes = () => {
           </form>
         </div>
       ) : (
-        <div className="bg-white p-6 shadow-md rounded-lg">
+        <div className="bg-white p-4 shadow-md rounded-lg">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center">
               <input
                 type="text"
-                placeholder="Search by Brand Name"
-                className="border border-gray-300 rounded-l px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search by Brand Name..."
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -588,8 +609,11 @@ const Bikes = () => {
               <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                 <tr>
                   <th scope="col" className="px-6 py-3">
-                    ID
+                    Sr. No.
                   </th>
+                  {/* <th scope="col" className="px-6 py-3">
+                    ID
+                  </th> */}
                   <th scope="col" className="px-6 py-3">
                     Brand Name
                   </th>
@@ -610,26 +634,27 @@ const Bikes = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-4">
+                    <td colSpan="7" className="text-center py-4">
                       Loading...
                     </td>
                   </tr>
-                ) : filteredData.length === 0 ? (
+                ) : data.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-4">
+                    <td colSpan="7" className="text-center py-4">
                       No data Found
                     </td>
                   </tr>
                 ) : (
-                  currentData.map((bike) => (
+                  currentData?.map((bike, index) => (
                     <tr
-                      key={bike.id}
+                      key={bike?.id}
                       className="bg-white border-b hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4">{bike.id}</td>
-                      <td className="px-6 py-4">{bike.brand}</td>
-                      <td className="px-6 py-4">{bike.categoryName}</td>
-                      <td className="px-6 py-4">{bike.model}</td>
+                      <td className="px-6 py-4">{indexOfFirstItem + index + 1}</td>
+                      {/* <td className="px-6 py-4">{bike?.id}</td> */}
+                      <td className="px-6 py-4">{bike?.brand}</td>
+                      <td className="px-6 py-4">{bike?.categoryName}</td>
+                      <td className="px-6 py-4">{bike?.model}</td>
                       <td className="px-6 py-4">
                         {bike.vehicleRegistrationNumber}
                       </td>
@@ -642,18 +667,19 @@ const Bikes = () => {
                             <FaEdit className="mr-2" />
                             Edit
                           </button>
-                          {/* <button
-                            className="px-4 py-2 flex items-center text-white bg-red-800 hover:bg-red-600 rounded"
-                            onClick={() => setConfirmDeleteId(bike.id)}
-                          >
-                            <FaTrash />
-                          </button> */}
                         </div>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan="7" className="text-right py-4 font-bold">
+                    Number of Rows : {filteredData.length}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
 
@@ -662,7 +688,7 @@ const Bikes = () => {
               <div className="bg-white p-6 rounded shadow-lg">
                 <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
                 <p className="mb-4">
-                  Are you sure you want to delete this Bike?
+                  Are you sure you want to delete this Store?
                 </p>
                 <div className="flex justify-end space-x-4">
                   <button
@@ -684,7 +710,9 @@ const Bikes = () => {
 
           <div className="flex justify-between items-center mt-6">
             <p className="text-sm text-gray-500">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
+              Showing {indexOfFirstItem + 1} to{" "}
+              {Math.min(indexOfLastItem, filteredData.length)} of{" "}
+              {filteredData.length} entries
             </p>
             <div className="flex space-x-2">
               <button

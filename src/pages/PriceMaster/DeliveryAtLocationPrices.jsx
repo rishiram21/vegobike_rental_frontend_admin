@@ -84,8 +84,8 @@ const DeliveryAtLocationPrices = () => {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen mt-14">
-      <div className="flex justify-between items-center mb-6">
+    <div className=" bg-gray-100 min-h-screen">
+      <div className="flex justify-between items-center mt-4 mb-4">
         <h1 className="text-2xl font-bold text-gray-800">All Price List</h1>
         {!formVisible && (
           <button

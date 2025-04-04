@@ -1,11 +1,31 @@
 import { useNavigate } from "react-router-dom";
+import apiClient from '../api/apiConfig';
 
 const Logout = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove token from localStorage
-    navigate("/"); // Redirect to login page
+  const handleLogout = async () => {
+    try {
+      // Attempt server logout first
+      await apiClient.post("/logout", {}, {
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // If using Bearer token
+        }
+      });
+      
+      // Clear client-side storage
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("sessionData"); // If using sessionStorage
+      
+      // Force full page reload to clear all application state
+      window.location.href = "/";
+    } catch (error) {
+      // console.error("Logout failed:", error);
+      // Fallback cleanup if server unavailable
+      localStorage.removeItem("token");
+      navigate("/");
+    }
   };
 
   return (

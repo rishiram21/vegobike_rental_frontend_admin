@@ -11,21 +11,25 @@ const Allcoupons = () => {
   const [editingId, setEditingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [formData, setFormData] = useState({
-    couponName: " ",
-    couponCode: " ",
-    couponType: " ",
-    discountValue: " ",
-    minimumRideAmount: " ",
-    totalCoupon: " ",
-    remainingCoupon: " ",
+    couponName: "",
+    couponCode: "",
+    couponType: "",
+    discountValue: "",
+    minimumRideAmount: "",
+    totalCoupon: "",
+    remainingCoupon: "",
     isActive: true,
   });
   const [loading, setLoading] = useState(true);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
 
-  // Fetch coupons data
   useEffect(() => {
-    const fetchcoupons = async () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+    const fetchCoupons = async () => {
       setLoading(true);
       try {
         const response = await apiClient.get("/coupons/all");
@@ -39,26 +43,27 @@ const Allcoupons = () => {
         setLoading(false);
       }
     };
-    fetchcoupons();
+    fetchCoupons();
   }, []);
 
-  // Add coupons
   const handledAddcoupon = (e) => {
     e.preventDefault();
-
+    const updatedFormData = {
+      ...formData,
+      couponType: formData.couponType || "FIXED_VALUE", // Default value
+      isActive: formData.isActive ?? true, // Ensure isActive is not null
+    };
     apiClient
-      .post("/coupons/add", formData)
+      .post("/coupons/add", updatedFormData)
       .then((response) => {
         setData([...data, response.data]);
         resetForm();
-        // Refresh the page after adding a new coupon
         window.location.reload();
       })
       .catch((error) => console.error("Error adding coupon data", error));
   };
 
-  // Save Edit
-  const handleSaveEditcoupon = (e) => {
+  const handleSaveEditCoupon = (e) => {
     e.preventDefault();
     apiClient
       .put(`/coupons/updateId/${editingId}`, formData)
@@ -71,8 +76,7 @@ const Allcoupons = () => {
       .catch((error) => console.error("Error saving data:", error));
   };
 
-  // Edit coupon
-  const handleEditcoupon = (coupon) => {
+  const handleEditCoupon = (coupon) => {
     setEditingId(coupon.couponId);
     setFormData({
       couponName: coupon.couponName,
@@ -87,8 +91,7 @@ const Allcoupons = () => {
     setFormVisible(true);
   };
 
-  // Delete coupon
-  const handleDeletecoupon = (id) => {
+  const handleDeleteCoupon = (id) => {
     apiClient
       .delete(`/coupons/deleteId/${id}`)
       .then(() => setData(data.filter((coupon) => coupon.couponId !== id)))
@@ -96,23 +99,21 @@ const Allcoupons = () => {
       .finally(() => setConfirmDeleteId(null));
   };
 
-  // Reset Form
   const resetForm = () => {
     setEditingId(null);
     setFormData({
-      couponName: " ",
-      couponCode: " ",
-      couponType: " ",
-      discountValue: " ",
-      minimumRideAmount: " ",
-      totalCoupon: " ",
-      remainingCoupon: " ",
+      couponName: "",
+      couponCode: "",
+      couponType: "",
+      discountValue: "",
+      minimumRideAmount: "",
+      totalCoupon: "",
+      remainingCoupon: "",
       isActive: true,
     });
     setFormVisible(false);
   };
 
-  // Filtered data based on search query
   const filteredData = data.filter((item) => {
     if (!item.couponName) {
       return false;
@@ -120,13 +121,14 @@ const Allcoupons = () => {
     return item.couponName.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  // Toggle status function
+  // Calculate the starting serial number for the current page
+  const startingSerialNumber = indexOfFirstItem + 1;
+
   const toggleStatus = (id, currentStatus) => {
     const newStatus = !currentStatus;
     apiClient
@@ -142,13 +144,13 @@ const Allcoupons = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen mt-14">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">All Coupon List</h1>
+    <div className=" bg-gray-100 min-h-screen">
+      <div className="flex justify-between items-center mt-4 mb-4">
+        <h1 className="text-xl font-bold text-gray-800 md:text-2xl">All Coupon List</h1>
         {!formVisible && (
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded-r hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
           >
             + Add Coupon
           </button>
@@ -156,13 +158,13 @@ const Allcoupons = () => {
       </div>
 
       {formVisible ? (
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-4">
+        <div className="bg-white p-4 rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold mb-4 md:text-xl">
             {editingId ? "Edit Coupon" : "Add New Coupon"}
           </h2>
-          <form onSubmit={editingId ? handleSaveEditcoupon : handledAddcoupon}>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 sm:col-span-1">
+          <form onSubmit={editingId ? handleSaveEditCoupon : handledAddcoupon}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="col-span-1">
                 <label className="font-medium">Coupon Name</label>
                 <input
                   type="text"
@@ -176,7 +178,7 @@ const Allcoupons = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Coupon Code</label>
                 <input
                   type="text"
@@ -192,7 +194,7 @@ const Allcoupons = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Discount Type</label>
                 <select
                   name="couponType"
@@ -207,7 +209,7 @@ const Allcoupons = () => {
                   <option value="PERCENTAGE">Percentage</option>
                 </select>
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Discount Value</label>
                 <input
                   type="text"
@@ -223,7 +225,7 @@ const Allcoupons = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">
                   Minimum Ride Amount
                 </label>
@@ -240,7 +242,7 @@ const Allcoupons = () => {
                   }
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">
                   Total Coupons
                 </label>
@@ -257,7 +259,7 @@ const Allcoupons = () => {
                   }
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">
                   Remaining Coupons
                 </label>
@@ -274,7 +276,7 @@ const Allcoupons = () => {
                   }
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Status</label>
                 <select
                   name="isActive"
@@ -290,7 +292,7 @@ const Allcoupons = () => {
                 </select>
               </div>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end mt-4">
               <button
                 type="submit"
                 className="px-4 py-2 mr-2 text-white bg-blue-900 rounded hover:bg-blue-600"
@@ -308,13 +310,13 @@ const Allcoupons = () => {
           </form>
         </div>
       ) : (
-        <div className="bg-white p-6 shadow-md rounded-lg">
+        <div className="bg-white p-4 shadow-md rounded-lg">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center">
               <input
                 type="text"
-                placeholder="Search..."
-                className="border border-gray-300 rounded-l px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search By Coupon Name..."
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -324,28 +326,31 @@ const Allcoupons = () => {
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                 <tr>
-                  <th scope="col" className="px-6 py-3">
-                    ID
+                  <th scope="col" className="px-4 py-2">
+                    SR. NO.
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  {/* <th scope="col" className="px-4 py-2">
+                    ID
+                  </th> */}
+                  <th scope="col" className="px-4 py-2">
                     Coupon Name
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  <th scope="col" className="px-4 py-2">
                     Coupon Code
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  <th scope="col" className="px-4 py-2">
                     Discount
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  <th scope="col" className="px-4 py-2">
                     Total Coupons
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  <th scope="col" className="px-4 py-2">
                     Remaining Coupons
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  <th scope="col" className="px-4 py-2">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  <th scope="col" className="px-4 py-2">
                     Action
                   </th>
                 </tr>
@@ -353,29 +358,30 @@ const Allcoupons = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-4">
+                    <td colSpan="9" className="text-center py-4">
                       Loading...
                     </td>
                   </tr>
                 ) : currentData.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-4">
+                    <td colSpan="9" className="text-center py-4">
                       No data found
                     </td>
                   </tr>
                 ) : (
-                  currentData.map((coupon) => (
+                  currentData.map((coupon, index) => (
                     <tr
                       key={coupon.couponId}
                       className="bg-white border-b hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4">{coupon.couponId}</td>
-                      <td className="px-6 py-4">{coupon.couponName}</td>
-                      <td className="px-6 py-4">{coupon.couponCode}</td>
-                      <td className="px-6 py-4">{coupon.discountValue}</td>
-                      <td className="px-6 py-4">{coupon.totalCoupon}</td>
-                      <td className="px-6 py-4">{coupon.remainingCoupon}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">{startingSerialNumber + index}</td>
+                      {/* <td className="px-4 py-3">{coupon.couponId}</td> */}
+                      <td className="px-4 py-3">{coupon.couponName}</td>
+                      <td className="px-4 py-3">{coupon.couponCode}</td>
+                      <td className="px-4 py-3">{coupon.discountValue}</td>
+                      <td className="px-4 py-3">{coupon.totalCoupon}</td>
+                      <td className="px-4 py-3">{coupon.remainingCoupon}</td>
+                      <td className="px-4 py-3">
                         <button
                           className={`px-2 py-1 rounded ${
                             coupon.isActive ? "bg-green-600 hover:bg-green-600 text-white" : "bg-red-700 hover:bg-red-600 text-white"
@@ -385,21 +391,15 @@ const Allcoupons = () => {
                           {coupon.isActive ? "Active" : "Inactive"}
                         </button>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-4">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center space-x-2">
                           <button
-                            className="px-4 py-2 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded mr-2"
-                            onClick={() => handleEditcoupon(coupon)}
+                            className="px-3 py-1 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
+                            onClick={() => handleEditCoupon(coupon)}
                           >
-                            <FaEdit className="mr-2" />
+                            <FaEdit className="mr-1" />
                             Edit
                           </button>
-                          {/* <button
-                            className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 rounded"
-                            onClick={() => setConfirmDeleteId(coupon.couponId)}
-                          >
-                            <FaTrash />
-                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -411,14 +411,14 @@ const Allcoupons = () => {
           {confirmDeleteId && (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
               <div className="bg-white p-6 rounded shadow-lg">
-                <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
+                <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
                 <p className="mb-4">
                   Are you sure you want to delete this coupon?
                 </p>
                 <div className="flex justify-end space-x-4">
                   <button
                     className="bg-red-500 text-white px-4 py-2 rounded shadow-md hover:bg-red-700"
-                    onClick={() => handleDeletecoupon(confirmDeleteId)}
+                    onClick={() => handleDeleteCoupon(confirmDeleteId)}
                   >
                     Yes, Delete
                   </button>
@@ -432,7 +432,7 @@ const Allcoupons = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-500">
               Showing {indexOfFirstItem + 1} to{" "}
               {Math.min(indexOfLastItem, filteredData.length)} of{" "}
@@ -440,7 +440,7 @@ const Allcoupons = () => {
             </p>
             <div className="flex space-x-2">
               <button
-                className="px-4 py-2 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
@@ -449,7 +449,7 @@ const Allcoupons = () => {
               {[...Array(totalPages)].map((_, index) => (
                 <button
                   key={index}
-                  className={`px-4 py-2 rounded ${
+                  className={`px-3 py-1 rounded ${
                     currentPage === index + 1
                       ? "bg-blue-900 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -462,7 +462,7 @@ const Allcoupons = () => {
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
-                className={`px-4 py-2 rounded ${
+                className={`px-3 py-1 rounded ${
                   currentPage === totalPages
                     ? "bg-gray-300 text-gray-500"
                     : "bg-blue-900 text-white hover:bg-blue-600"

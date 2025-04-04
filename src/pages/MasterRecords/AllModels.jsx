@@ -135,9 +135,9 @@ const AllModels = () => {
   // };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen mt-14">
+    <div className=" bg-gray-100 min-h-screen">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mt-4 mb-4">
         <h1 className="text-2xl font-bold text-gray-800">All Models</h1>
         {!formVisible && (
           <button

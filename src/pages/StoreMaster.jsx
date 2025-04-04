@@ -40,6 +40,11 @@ const StoreMaster = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
     const fetchStores = async () => {
       setLoading(true);
       try {
@@ -111,6 +116,22 @@ const StoreMaster = () => {
       .catch((error) => console.error("Error saving data:", error));
   };
 
+  // const handleEditStore = (store) => {
+  //   setEditingId(store.id);
+  //   setFormData({
+  //     storeName: store.name,
+  //     storeOwner: store.storeOwner,
+  //     storePhone: store.phone,
+  //     storeAddress: store.address,
+  //     cityId: store.cityId,
+  //     subCityId: store.subCityId,
+  //     mapUrl: store.mapUrl,
+  //     storeEmail: store.storeEmail,
+  //     image: store.image,
+  //   });
+  //   setFormVisible(true);
+  // };
+
   const handleEditStore = (store) => {
     setEditingId(store.id);
     setFormData({
@@ -124,9 +145,11 @@ const StoreMaster = () => {
       storeEmail: store.storeEmail,
       image: store.image,
     });
+    // Fetch subcities based on the selected city
+    fetchSubcities(store.cityId);
     setFormVisible(true);
   };
-
+  
   const handleDeleteStore = (id) => {
     apiClient
       .delete(`/store/${id}`)
@@ -161,13 +184,13 @@ const StoreMaster = () => {
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen mt-14">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">All Stores</h1>
+    <div className=" bg-gray-100 min-h-screen">
+      <div className="flex justify-between items-center mt-4 mb-4">
+        <h1 className="text-xl font-bold text-gray-800 md:text-2xl">All Stores</h1>
         {!formVisible && (
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded-r hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
           >
             + Add Store
           </button>
@@ -175,13 +198,13 @@ const StoreMaster = () => {
       </div>
 
       {formVisible ? (
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-4">
+        <div className="bg-white p-4 rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold mb-4 md:text-xl">
             {editingId ? "Edit Store" : "Add New Store"}
           </h2>
           <form onSubmit={editingId ? handleSaveEdit : handledAddStore}>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 sm:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="col-span-1">
                 <label className="font-medium">Store Name</label>
                 <input
                   type="text"
@@ -348,13 +371,13 @@ const StoreMaster = () => {
           </form>
         </div>
       ) : (
-        <div className="bg-white p-6 shadow-md rounded-lg">
+        <div className="bg-white p-4 shadow-md rounded-lg">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center">
               <input
                 type="text"
                 placeholder="Search by Store Name..."
-                className="border border-gray-300 rounded-l px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -364,13 +387,12 @@ const StoreMaster = () => {
             <table className="w-full text-sm text-left text-gray-500">
               <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                 <tr>
-                  <th scope="col" className="px-6 py-3">S.No.</th>
-                  {/* <th scope="col" className="px-6 py-3">ID</th> */}
-                  <th scope="col" className="px-6 py-3">Store Image</th>
-                  <th scope="col" className="px-6 py-3">Store Name</th>
-                  <th scope="col" className="px-6 py-3">Contact Number</th>
-                  <th scope="col" className="px-6 py-3">Address</th>
-                  <th scope="col" className="px-6 py-3">Action</th>
+                  <th scope="col" className="px-4 py-2">S.No.</th>
+                  <th scope="col" className="px-4 py-2">Store Image</th>
+                  <th scope="col" className="px-4 py-2">Store Name</th>
+                  <th scope="col" className="px-4 py-2">Contact Number</th>
+                  <th scope="col" className="px-4 py-2">Address</th>
+                  <th scope="col" className="px-4 py-2">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -392,9 +414,8 @@ const StoreMaster = () => {
                       key={store.id}
                       className="bg-white border-b hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4">{indexOfFirstItem + index + 1}</td>
-                      {/* <td className="px-6 py-4">{store.id}</td> */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">{indexOfFirstItem + index + 1}</td>
+                      <td className="px-4 py-3">
                         {store.image ? (
                           <img
                             src={store.image}
@@ -409,9 +430,9 @@ const StoreMaster = () => {
                           "-"
                         )}
                       </td>
-                      <td className="px-6 py-4">{store.name}</td>
-                      <td className="px-6 py-4">{store.phone}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">{store.name}</td>
+                      <td className="px-4 py-3">{store.phone}</td>
+                      <td className="px-4 py-3">
                         <a
                           href={store.address}
                           target="_blank"
@@ -421,21 +442,15 @@ const StoreMaster = () => {
                           {store.address}
                         </a>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-4">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center space-x-2">
                           <button
-                            className="px-4 py-2 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
+                            className="px-3 py-1 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
                             onClick={() => handleEditStore(store)}
                           >
-                            <FaEdit className="mr-2" />
+                            <FaEdit className="mr-1" />
                             Edit
                           </button>
-                          {/* <button
-                            className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 rounded"
-                            onClick={() => setConfirmDeleteId(store.id)}
-                          >
-                            <FaTrash />
-                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -444,8 +459,8 @@ const StoreMaster = () => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="7" className="px-6 py-4 text-right">
-                    <strong>Total Stores: {currentData.length} </strong>
+                  <td colSpan="7" className="px-4 py-3 text-right">
+                    <strong>Number of rows: {currentData.length} </strong>
                   </td>
                 </tr>
               </tfoot>
@@ -454,7 +469,7 @@ const StoreMaster = () => {
           {confirmDeleteId && (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
               <div className="bg-white p-6 rounded shadow-lg">
-                <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
+                <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
                 <p className="mb-4">
                   Are you sure you want to delete this Store?
                 </p>
@@ -475,7 +490,7 @@ const StoreMaster = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-500">
               Showing {indexOfFirstItem + 1} to{" "}
               {Math.min(indexOfLastItem, filteredData.length)} of{" "}
@@ -483,7 +498,7 @@ const StoreMaster = () => {
             </p>
             <div className="flex space-x-2">
               <button
-                className="px-4 py-2 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
@@ -492,7 +507,7 @@ const StoreMaster = () => {
               {[...Array(totalPages)].map((_, index) => (
                 <button
                   key={index}
-                  className={`px-4 py-2 rounded ${
+                  className={`px-3 py-1 rounded ${
                     currentPage === index + 1
                       ? "bg-blue-900 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -505,7 +520,7 @@ const StoreMaster = () => {
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
-                className={`px-4 py-2 rounded ${
+                className={`px-3 py-1 rounded ${
                   currentPage === totalPages
                     ? "bg-gray-300 text-gray-500"
                     : "bg-blue-900 text-white hover:bg-blue-600"
