@@ -1,11 +1,10 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { BASE_URL } from "../api/api";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import apiClient from "../api/apiConfig";
 
 function convertImageToBase64(file) {
-  console.log(file);
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -23,20 +22,19 @@ const Bikes = () => {
   const [statuses, setStatuses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [formVisible, setFormVisible] = useState(false); //FORM State
+  const [formVisible, setFormVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [brands, setBrands] = useState([]); //for the brands
-  const [categories, setCategories] = useState([]); //for the categories
-  const [models, setModels] = useState([]); //for the models
-  const [stores, setStores] = useState([]); //for the stores
-  const [fuel, setFuel] = useState([]); //for the fule
-
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [models, setModels] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [fuel, setFuel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [itemsPerPage] = useState(7);
-  const [cities, setCities] = useState([]); // New state for cities
-  const [subcities, setSubcities] = useState([]); // State for subcities/areas
-  const [totalPages, setTotalPages] = useState(1); // Keep track of total pages
+  const [totalPages, setTotalPages] = useState(1);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const [formData, setFormData] = useState({
     vehicleBrandId: "",
@@ -68,15 +66,10 @@ const Bikes = () => {
       setStatuses(
         response.data.content.map((item) => ({
           id: item.id,
-          status: "AVILABLE",
+          status: "AVAILABLE",
         }))
       );
-      if (response.data && response.data.content) {
-        setData(response.data.content);
-        setTotalPages(response.data.totalPages);
-      } else {
-        console.error("Invalid response format");
-      }
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching bike data:", error);
     } finally {
@@ -86,6 +79,11 @@ const Bikes = () => {
 
   const handleAddBike = (e) => {
     e.preventDefault();
+    setConfirmAction(() => handleAddBikeConfirm);
+    setShowConfirmModal(true);
+  };
+
+  const handleAddBikeConfirm = () => {
     apiClient
       .post("/vehicle/add", formData, {
         headers: {
@@ -93,17 +91,14 @@ const Bikes = () => {
         },
       })
       .then((response) => {
-        if (!Array.isArray(data)) {
-          console.error("Data is not an array. Resetting to an empty array.");
-          setData([response.data]);
-        } else {
-          setData([...data, response.data]);
-        }
+        setData([...data, response.data]);
         resetForm();
+        fetchBikes();
       })
       .catch((error) => {
         console.error("Error Adding Bike Data", error);
       });
+    setShowConfirmModal(false);
   };
 
   const handleFileUpload = (e) => {
@@ -116,7 +111,6 @@ const Bikes = () => {
         return;
       }
 
-      console.log(file, e.target.name, "uploading files");
       setFormData({
         ...formData,
         [e?.target?.name]: file,
@@ -155,7 +149,7 @@ const Bikes = () => {
 
   const fetchStores = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/store/all");
+      const response = await apiClient.get("/store/all");
       setStores(response.data.content);
     } catch (error) {
       console.error("Error fetching stores data:", error);
@@ -164,17 +158,20 @@ const Bikes = () => {
 
   const fetchFuel = async () => {
     try {
-      const response = await axios.get("");
+      const response = await apiClient.get("/fuel/all");
       setFuel(response.data.content);
     } catch (error) {
-      console.error("Error fetching stores data:", error);
+      console.error("Error fetching fuel data:", error);
     }
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    console.log("Editing ID:", editingId);
+    setConfirmAction(() => handleSaveEditConfirm);
+    setShowConfirmModal(true);
+  };
 
+  const handleSaveEditConfirm = () => {
     let blob = new Blob([formData.pucPdfFile.fileContent], { type: "pdf" });
     let file = new File([blob], { type: "pdf" });
     let blob1 = new Blob([formData.insurancePdfFile.fileContent], { type: "pdf" });
@@ -182,32 +179,30 @@ const Bikes = () => {
     let blob2 = new Blob([formData.documentPdfFile.fileContent], { type: "pdf" });
     let file2 = new File([blob2], { type: "pdf" });
 
-    try {
-      const response = await axios.put(
-        `http://localhost:8080/vehicle/${editingId}`,
-        { ...formData, pucPdfFile: file, insurancePdfFile : file1,  documentPdfFile: file2},
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setData((prevData) =>
-        prevData.map((bike) => (bike.id === editingId ? response.data : bike))
-      );
-
-      resetForm();
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
+    apiClient
+      .put(`/vehicle/${editingId}`, { ...formData, pucPdfFile: file, insurancePdfFile: file1, documentPdfFile: file2 }, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        setData((prevData) =>
+          prevData.map((bike) => (bike.id === editingId ? response.data : bike))
+        );
+        resetForm();
+        fetchBikes();
+      })
+      .catch((error) => {
+        console.error("Error saving data:", error);
+      });
+    setShowConfirmModal(false);
   };
 
   const handleEditBike = (bike) => {
     setEditingId(bike.id);
     setFormData({
       vehicleBrandId: bike.vehicleBrandId,
-      vehicleCategoryId: bike.vehicleCategoryId,
+      vehicleCategoryId: bike.categoryId,
       vehicleModelId: bike.vehicleModelId,
       storeId: bike.storeId,
       vehicleRegistrationNumber: bike.vehicleRegistrationNumber,
@@ -221,12 +216,17 @@ const Bikes = () => {
       documentPdfFile: bike.documentPdfFile,
       image: bike.image,
     });
+
+    if (bike.vehicleBrandId) {
+      fetchModels(bike.vehicleBrandId);
+    }
+
     setFormVisible(true);
   };
 
   const handleDeleteBike = (id) => {
-    axios
-      .delete(`http://localhost:8080/bike/${id}`)
+    apiClient
+      .delete(`/vehicle/${id}`)
       .then(() => setData(data.filter((bike) => bike.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => setConfirmDeleteId(null));
@@ -260,7 +260,7 @@ const Bikes = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentData = filteredData.slice(0, itemsPerPage);
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   const toggleStatus = (id) => {
     setStatuses((prevStatuses) =>
@@ -268,7 +268,7 @@ const Bikes = () => {
         row.id === id
           ? {
               ...row,
-              status: row.status === "AVILABLE" ? "BOOKED" : "AVILABLE",
+              status: row.status === "AVAILABLE" ? "BOOKED" : "AVAILABLE",
             }
           : row
       )
@@ -278,44 +278,36 @@ const Bikes = () => {
   useEffect(() => {
     fetchBikes();
     fetchBrands();
-    fetchModels();
     fetchCategory();
     fetchStores();
     fetchFuel();
+
+    window.scrollTo(0, 0);
   }, [currentPage, itemsPerPage]);
 
   return (
-    <div className=" bg-gray-100 min-h-screen">
-      <div className="flex justify-between items-center mt-4 mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">All Bikes List</h1>
-        {!formVisible && (
-          <button
-            onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
-         >
-            + Add Bike
-          </button>
-        )}
-      </div>
+    <div className="bg-gray-100 min-h-screen">
+      <ToastContainer />
+      
 
       {formVisible ? (
-        <div className="p-6 bg-white shadow-md rounded">
-          <h2 className="text-xl font-bold mb-4">
+        <div className="bg-white p-4 rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold mb-4 md:text-xl">
             {editingId ? "Edit Bike" : "Add New Bike"}
           </h2>
           <form onSubmit={editingId ? handleSaveEdit : handleAddBike}>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 sm:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="col-span-1">
                 <label className="font-medium">Brand Name *</label>
                 <select
                   name="vehicleBrandId"
-                  placeholder="Enter Brand Name"
                   className="border p-2 rounded w-full"
                   value={formData.vehicleBrandId}
                   onChange={(e) => {
                     setFormData({
                       ...formData,
                       vehicleBrandId: e.target.value,
+                      vehicleModelId: ""
                     });
                     fetchModels(e.target.value);
                   }}
@@ -329,11 +321,10 @@ const Bikes = () => {
                   ))}
                 </select>
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">Model Name *</label>
                 <select
                   name="vehicleModelId"
-                  placeholder="Enter Model Name"
                   className="border p-2 rounded w-full"
                   defaultValue={formData.vehicleModelId}
                   onChange={(e) =>{
@@ -352,11 +343,10 @@ const Bikes = () => {
                   ))}
                 </select>
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">Category Name *</label>
                 <select
                   name="vehicleCategoryId"
-                  placeholder="Enter Brand Name"
                   className="border p-2 rounded w-full"
                   value={formData.vehicleCategoryId}
                   onChange={(e) =>
@@ -375,7 +365,7 @@ const Bikes = () => {
                   ))}
                 </select>
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">
                   Vehicle Registration Number *
                 </label>
@@ -394,7 +384,7 @@ const Bikes = () => {
                   required
                 />
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">Registration Year *</label>
                 <input
                   type="text"
@@ -411,7 +401,7 @@ const Bikes = () => {
                   required
                 />
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">Vehicle Chassis Number *</label>
                 <input
                   type="text"
@@ -428,7 +418,7 @@ const Bikes = () => {
                   required
                 />
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">Vehicle Engine Number *</label>
                 <input
                   type="text"
@@ -445,11 +435,10 @@ const Bikes = () => {
                   required
                 />
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              <div className="col-span-1">
                 <label className="font-medium">Store Name *</label>
                 <select
                   name="storeId"
-                  placeholder="Enter Store Name"
                   className="border p-2 rounded w-full"
                   value={formData.storeId}
                   onChange={(e) =>
@@ -465,7 +454,6 @@ const Bikes = () => {
                   ))}
                 </select>
               </div>
-
               <div className="mb-4">
                 <label className="block mb-2 font-medium">Upload PUC</label>
                 <input
@@ -487,7 +475,6 @@ const Bikes = () => {
                   </div>
                 )}
               </div>
-
               <div className="mb-4">
                 <label className="block mb-2 font-medium">
                   Upload Insurance
@@ -547,7 +534,6 @@ const Bikes = () => {
                     if (file) {
                       try {
                         const base64String = await convertImageToBase64(file);
-                        console.log("Base64:", base64String);
                         setFormData({
                           ...formData,
                           image: base64String,
@@ -572,11 +558,10 @@ const Bikes = () => {
                 )}
               </div>
             </div>
-
-            <div className="mt-4">
+            <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+                className="px-4 py-2 mr-2 text-white bg-blue-900 rounded hover:bg-blue-600"
               >
                 {editingId ? "Save" : "Add"}
               </button>
@@ -591,80 +576,72 @@ const Bikes = () => {
           </form>
         </div>
       ) : (
-        <div className="bg-white p-4 shadow-md rounded-lg">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center">
-              <input
-                type="text"
-                placeholder="Search by Brand Name..."
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className="flex justify-between items-center mb-6">
+  <div className="flex items-center gap-4">
+    <h3 className="text-xl font-bold text-blue-900">All Bikes</h3>
+    {!formVisible && (
+      <button
+        onClick={() => setFormVisible(true)}
+        className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+      >
+        + Add Bike
+      </button>
+    )}
+  </div>
 
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-200">
+  <input
+    type="text"
+    placeholder="Search by Brand Name..."
+    className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+</div>
+
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs uppercase bg-blue-900 text-white">
                 <tr>
-                  <th scope="col" className="px-6 py-3">
-                    Sr. No.
-                  </th>
-                  {/* <th scope="col" className="px-6 py-3">
-                    ID
-                  </th> */}
-                  <th scope="col" className="px-6 py-3">
-                    Brand Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Category
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Model Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Vehicle Registration Number
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Action
-                  </th>
+                  <th scope="col" className="px-6 py-3">No.</th>
+                  <th scope="col" className="px-6 py-3">Brand Name</th>
+                  <th scope="col" className="px-6 py-3">Category</th>
+                  <th scope="col" className="px-6 py-3">Model Name</th>
+                  <th scope="col" className="px-6 py-3">Vehicle Registration Number</th>
+                  <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-4">
-                      Loading...
+                    <td colSpan="7" className="text-center py-6">
+                      <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
+                        <span className="ml-2">Loading...</span>
+                      </div>
                     </td>
                   </tr>
-                ) : data.length === 0 ? (
+                ) : currentData.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center py-4">
-                      No data Found
+                      No data found
                     </td>
                   </tr>
                 ) : (
-                  currentData?.map((bike, index) => (
-                    <tr
-                      key={bike?.id}
-                      className="bg-white border-b hover:bg-gray-50"
-                    >
-                      <td className="px-6 py-4">{indexOfFirstItem + index + 1}</td>
-                      {/* <td className="px-6 py-4">{bike?.id}</td> */}
-                      <td className="px-6 py-4">{bike?.brand}</td>
-                      <td className="px-6 py-4">{bike?.categoryName}</td>
-                      <td className="px-6 py-4">{bike?.model}</td>
+                  currentData.map((bike, index) => (
+                    <tr key={bike.id} className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <td className="px-6 py-4 font-medium">{indexOfFirstItem + index + 1}</td>
+                      <td className="px-6 py-4">{bike.brand}</td>
+                      <td className="px-6 py-4">{bike.categoryName}</td>
+                      <td className="px-6 py-4">{bike.model}</td>
+                      <td className="px-6 py-4">{bike.vehicleRegistrationNumber}</td>
                       <td className="px-6 py-4">
-                        {bike.vehicleRegistrationNumber}
-                      </td>
-                      <td className="px-6 py-4 ">
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
                           <button
-                            className="px-4 py-2 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
+                            className="px-3 py-1.5 flex items-center text-white bg-blue-700 hover:bg-blue-800 rounded-md transition-colors shadow-sm"
                             onClick={() => handleEditBike(bike)}
                           >
-                            <FaEdit className="mr-2" />
+                            <FaEdit className="mr-1.5" size={14} />
                             Edit
                           </button>
                         </div>
@@ -673,78 +650,125 @@ const Bikes = () => {
                   ))
                 )}
               </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan="7" className="text-right py-4 font-bold">
-                    Number of Rows : {filteredData.length}
-                  </td>
-                </tr>
-              </tfoot>
             </table>
           </div>
-
-          {confirmDeleteId && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-              <div className="bg-white p-6 rounded shadow-lg">
-                <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
-                <p className="mb-4">
-                  Are you sure you want to delete this Store?
-                </p>
-                <div className="flex justify-end space-x-4">
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded shadow-md hover:bg-red-700"
-                    onClick={() => handleDeleteBike(confirmDeleteId)}
-                  >
-                    Yes, Delete
-                  </button>
-                  <button
-                    className="bg-gray-500 text-white px-4 py-2 rounded shadow-md hover:bg-gray-700"
-                    onClick={() => setConfirmDeleteId(null)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className="flex justify-between items-center mt-6">
-            <p className="text-sm text-gray-500">
-              Showing {indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, filteredData.length)} of{" "}
-              {filteredData.length} entries
+            <p className="text-sm text-gray-600">
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
             </p>
-            <div className="flex space-x-2">
+            <div className="flex space-x-1">
               <button
-                className="px-4 py-2 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-sm text-white bg-blue-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
                 Previous
               </button>
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  className={`px-4 py-2 rounded ${
-                    currentPage === index + 1
-                      ? "bg-blue-900 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                  onClick={() => setCurrentPage(index + 1)}
-                >
-                  {index + 1}
-                </button>
-              ))}
+              {totalPages <= 5 ? (
+                [...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    className={`px-3 py-1.5 rounded-md text-sm ${
+                      currentPage === index + 1
+                        ? "bg-blue-800 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    } transition-colors`}
+                    onClick={() => setCurrentPage(index + 1)}
+                  >
+                    {index + 1}
+                  </button>
+                ))
+              ) : (
+                <>
+                  {[...Array(Math.min(3, currentPage))].map((_, index) => (
+                    <button
+                      key={index}
+                      className={`px-3 py-1.5 rounded-md text-sm ${
+                        currentPage === index + 1
+                          ? "bg-blue-800 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      } transition-colors`}
+                      onClick={() => setCurrentPage(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  {currentPage > 3 && <span className="px-2 py-1.5">...</span>}
+                  {currentPage > 3 && currentPage < totalPages - 2 && (
+                    <button
+                      className="px-3 py-1.5 rounded-md text-sm bg-blue-800 text-white"
+                    >
+                      {currentPage}
+                    </button>
+                  )}
+                  {currentPage < totalPages - 2 && <span className="px-2 py-1.5">...</span>}
+                  {[...Array(Math.min(3, totalPages - Math.max(0, totalPages - 3)))].map((_, index) => (
+                    <button
+                      key={totalPages - 2 + index}
+                      className={`px-3 py-1.5 rounded-md text-sm ${
+                        currentPage === totalPages - 2 + index
+                          ? "bg-blue-800 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      } transition-colors`}
+                      onClick={() => setCurrentPage(totalPages - 2 + index)}
+                    >
+                      {totalPages - 2 + index}
+                    </button>
+                  ))}
+                </>
+              )}
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
-                className={`px-4 py-2 rounded ${
-                  currentPage === totalPages
-                    ? "bg-gray-300 text-gray-500"
-                    : "bg-blue-900 text-white hover:bg-blue-600"
-                }`}
+                className="px-3 py-1.5 text-sm rounded-md bg-blue-800 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
               >
                 Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
+            <p className="mb-4">
+              Are you sure you want to delete this Bike?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded shadow-md hover:bg-red-700"
+                onClick={() => handleDeleteBike(confirmDeleteId)}
+              >
+                Yes, Delete
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded shadow-md hover:bg-gray-700"
+                onClick={() => setConfirmDeleteId(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showConfirmModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Confirm Action</h3>
+            <p className="mb-4">Are you sure?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded shadow-md hover:bg-green-700"
+                onClick={confirmAction}
+              >
+                Yes
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded shadow-md hover:bg-gray-700"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                No
               </button>
             </div>
           </div>

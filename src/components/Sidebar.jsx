@@ -126,13 +126,13 @@ const Sidebar = () => {
     },
     { id: 6, path: "/dashboard/allOffers", name: "All Offers", icon: IoPricetagsOutline },
     { id: 9, path: "/dashboard/allRegisterCustomers", name: "All Registered Customers", icon: LuUsers2 },
-    { id: 10, name: "All Reports", icon: TbReportSearch,
-      submenu: [
-        { id: 101, path: "/dashboard/allReport/bookingReport", name: "Booking Report" },
-        { id: 102, path: "/dashboard/allReport/salesReport", name: "Sales Report" },
-        { id: 103, path: "/dashboard/allReport/gstReport", name: "GST Report" },
-      ],
-    },
+    // { id: 10, name: "All Reports", icon: TbReportSearch,
+    //   submenu: [
+    //     { id: 101, path: "/dashboard/allReport/bookingReport", name: "Booking Report" },
+    //     { id: 102, path: "/dashboard/allReport/salesReport", name: "Sales Report" },
+    //     { id: 103, path: "/dashboard/allReport/gstReport", name: "GST Report" },
+    //   ],
+    // },
   ];
 
   return (

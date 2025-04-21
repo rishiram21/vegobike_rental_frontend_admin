@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSpring, animated, config } from 'react-spring';
+import { useSpring, animated, useTrail, useChain, useSpringRef } from 'react-spring';
 import { useTable } from 'react-table';
 import apiClient from "../api/apiConfig";
 
@@ -15,6 +15,14 @@ const Home = () => {
   const [showBookings, setShowBookings] = useState(false);
   const [showStores, setShowStores] = useState(false);
   const [showBikes, setShowBikes] = useState(false);
+  const [showTodaysBookings, setShowTodaysBookings] = useState(false);
+  const [todaysBookings, setTodaysBookings] = useState([]);
+  const [verifiedUsers, setVerifiedUsers] = useState([]);
+  const [unverifiedUsers, setUnverifiedUsers] = useState([]);
+
+  // Spring references for animation chaining
+  const cardsSpringRef = useSpringRef();
+  const tableSpringRef = useSpringRef();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -23,10 +31,16 @@ const Home = () => {
       setLoading(true);
       try {
         const response = await apiClient.get("/users/all", {
-          params: { page: currentPage, size: 5, sortBy: 'id', sortDirection: 'asc' }
+          params: { page: currentPage, size: 10, sortBy: 'id', sortDirection: 'asc' }
         });
         setUsers(response.data.content);
         setTotalPages(response.data.totalPages);
+
+        // Fetch verified and unverified users
+        const verified = response.data.content.filter(user => user.isVerified);
+        const unverified = response.data.content.filter(user => !user.isVerified);
+        setVerifiedUsers(verified);
+        setUnverifiedUsers(unverified);
       } catch (error) {
         console.error("Error fetching users data:", error);
       } finally {
@@ -37,7 +51,22 @@ const Home = () => {
     const fetchBookings = async () => {
       try {
         const response = await apiClient.get("/booking/all");
-        setBookings(response.data);
+        const sortedBookings = response.data.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+        setBookings(sortedBookings);
+
+        // Fetch usernames for each booking
+        const bookingWithUsernames = await Promise.all(
+          sortedBookings.map(async (booking) => {
+            const userResponse = await apiClient.get(`/users/${booking.userId}`);
+            return { ...booking, userName: userResponse.data.name };
+          })
+        );
+        setBookings(bookingWithUsernames);
+
+        // Filter today's bookings
+        const today = new Date().toISOString().split('T')[0];
+        const todaysBookings = sortedBookings.filter(booking => booking.startDate.includes(today));
+        setTodaysBookings(todaysBookings);
       } catch (error) {
         console.error("Error fetching bookings data:", error);
       }
@@ -68,21 +97,71 @@ const Home = () => {
   }, [currentPage]);
 
   const stats = [
-    { title: "Today's Bookings", count: 1, color: "bg-blue-900" },
-    { title: "Ongoing Bookings", count: 3, color: "bg-yellow-400" },
-    { title: "Total Bikes", count: bikes.length, color: "bg-red-500" },
-    { title: "Total Bookings", count: bookings.length, color: "bg-teal-400" },
-    { title: "Total Users", count: users.length, color: "bg-cyan-400" },
-    { title: "Total Verified Users", count: users.filter(user => user.isVerified).length, color: "bg-green-400" },
-    { title: "Total Unverified Users", count: users.filter(user => !user.isVerified).length, color: "bg-yellow-400" },
-    { title: "Total Stores", count: stores.length, color: "bg-red-400" },
+    { title: "Today's Bookings", count: todaysBookings.length, color: "bg-blue-900", icon: "📅" },
+    { title: "Ongoing Bookings", count: 3, color: "bg-yellow-400", icon: "🔄" },
+    { title: "Total Bikes", count: bikes.length, color: "bg-red-500", icon: "🏍️" },
+    { title: "Total Bookings", count: bookings.length, color: "bg-teal-400", icon: "📚" },
+    { title: "Total Users", count: users.length-1, color: "bg-cyan-400", icon: "👥" },
+    { title: "Total Verified Users", count: verifiedUsers.length, color: "bg-green-400", icon: "✅" },
+    { title: "Total Unverified Users", count: unverifiedUsers.length-1, color: "bg-yellow-400", icon: "⚠️" },
+    { title: "Total Stores", count: stores.length, color: "bg-red-400", icon: "🏪" },
   ];
+
+  // Animated counter hook
+  const useCounter = (end, duration = 2000) => {
+    const [count, setCount] = useState(0);
+
+    const { number } = useSpring({
+      from: { number: 0 },
+      number: end,
+      delay: 300,
+      config: { duration }
+    });
+
+    useEffect(() => {
+      number.start({
+        from: { number: 0 },
+        to: { number: end }
+      });
+    }, [end, number]);
+
+    return number;
+  };
+
+  // Staggered animation for stat cards
+  const trail = useTrail(stats.length, {
+    ref: cardsSpringRef,
+    from: { opacity: 0, y: 40, scale: 0.9 },
+    to: { opacity: 1, y: 0, scale: 1 },
+    config: { mass: 1, tension: 280, friction: 20 }
+  });
+
+  // Table animations
+  const tableAnimation = useSpring({
+    ref: tableSpringRef,
+    from: { opacity: 0, transform: 'translateY(30px)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+    config: { tension: 280, friction: 24 },
+  });
+
+  // Chain the animations
+  useChain([cardsSpringRef, tableSpringRef], [0, 0.5]);
 
   const handleViewAllUsers = () => {
     setShowUsers(!showUsers);
     setShowBookings(false);
     setShowStores(false);
     setShowBikes(false);
+    setShowTodaysBookings(false);
+
+    if (!showUsers) {
+      setTimeout(() => {
+        const usersSection = document.getElementById('users-section');
+        if (usersSection) {
+          usersSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   const handleViewAllBookings = () => {
@@ -90,6 +169,16 @@ const Home = () => {
     setShowUsers(false);
     setShowStores(false);
     setShowBikes(false);
+    setShowTodaysBookings(false);
+
+    if (!showBookings) {
+      setTimeout(() => {
+        const bookingsSection = document.getElementById('bookings-section');
+        if (bookingsSection) {
+          bookingsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   const handleViewAllStores = () => {
@@ -97,6 +186,16 @@ const Home = () => {
     setShowUsers(false);
     setShowBookings(false);
     setShowBikes(false);
+    setShowTodaysBookings(false);
+
+    if (!showStores) {
+      setTimeout(() => {
+        const storesSection = document.getElementById('stores-section');
+        if (storesSection) {
+          storesSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   const handleViewAllBikes = () => {
@@ -104,10 +203,33 @@ const Home = () => {
     setShowUsers(false);
     setShowBookings(false);
     setShowStores(false);
+    setShowTodaysBookings(false);
+
+    if (!showBikes) {
+      setTimeout(() => {
+        const bikesSection = document.getElementById('bikes-section');
+        if (bikesSection) {
+          bikesSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   const handleViewTodaysBookings = () => {
-    // Implement logic to view today's bookings
+    setShowTodaysBookings(!showTodaysBookings);
+    setShowUsers(false);
+    setShowBookings(false);
+    setShowStores(false);
+    setShowBikes(false);
+
+    if (!showTodaysBookings) {
+      setTimeout(() => {
+        const todaysBookingsSection = document.getElementById('todays-bookings-section');
+        if (todaysBookingsSection) {
+          todaysBookingsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   const handleViewOngoingBookings = () => {
@@ -115,48 +237,73 @@ const Home = () => {
   };
 
   const handleViewVerifiedUsers = () => {
-    // Implement logic to view verified users
+    setShowUsers(true);
+    setShowBookings(false);
+    setShowStores(false);
+    setShowBikes(false);
+    setShowTodaysBookings(false);
+    setUsers(verifiedUsers);
+
+    setTimeout(() => {
+      const usersSection = document.getElementById('users-section');
+      if (usersSection) {
+        usersSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleViewUnverifiedUsers = () => {
-    // Implement logic to view unverified users
+    setShowUsers(true);
+    setShowBookings(false);
+    setShowStores(false);
+    setShowBikes(false);
+    setShowTodaysBookings(false);
+    setUsers(unverifiedUsers);
+
+    setTimeout(() => {
+      const usersSection = document.getElementById('users-section');
+      if (usersSection) {
+        usersSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Animated counter component
-  const AnimatedCounter = ({ value }) => {
-    const { number } = useSpring({
-      from: { number: 0 },
-      number: value,
-      delay: 200,
-      config: config.molasses,
-    });
-    
-    return <animated.span>{number.to(n => Math.floor(n))}</animated.span>;
-  };
-  
-  // Card entry animation
-  const fadeInUp = useSpring({
-    from: { opacity: 0, transform: 'translateY(20px)' },
-    to: { opacity: 1, transform: 'translateY(0)' },
+  // Pulse animation for the scroll-to-top button
+  const pulseAnimation = useSpring({
+    from: { scale: 1 },
+    to: async (next) => {
+      while (true) {
+        await next({ scale: 1.1, config: { duration: 1000 } });
+        await next({ scale: 1, config: { duration: 1000 } });
+      }
+    },
+  });
+
+  // Fade in animation for section headers
+  const sectionHeaderAnimation = useSpring({
+    from: { opacity: 0, transform: 'translateX(-20px)' },
+    to: { opacity: 1, transform: 'translateX(0)' },
     config: { tension: 300, friction: 20 },
   });
 
-  // Table entry animation
-  const tableAnimation = useSpring({ 
-    from: { opacity: 0, transform: 'scale(0.95)' },
-    to: { opacity: 1, transform: 'scale(1)' },
-    config: { tension: 280, friction: 18 },
-  });
-
+  // Table component with animations
   const Table = ({ columns, data }) => {
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data });
 
+    // Row animation
+    const rowAnimations = useTrail(rows.length, {
+      from: { opacity: 0, transform: 'translateX(-10px)' },
+      to: { opacity: 1, transform: 'translateX(0)' },
+      config: { tension: 280, friction: 20 },
+      delay: 200,
+    });
+
     return (
-      <animated.div style={tableAnimation} className="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+      <animated.div style={tableAnimation} className="overflow-x-auto rounded-lg shadow-lg border border-gray-200 bg-white">
         <table {...getTableProps()} className="w-full text-sm text-left text-gray-700">
           <thead className="text-xs text-white uppercase bg-blue-900">
             {headerGroups.map(headerGroup => (
@@ -171,11 +318,15 @@ const Home = () => {
             {rows.map((row, rowIndex) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()} className={`${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150`}>
+                <animated.tr
+                  {...row.getRowProps()}
+                  style={rowAnimations[rowIndex]}
+                  className={`${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150`}
+                >
                   {row.cells.map(cell => (
                     <td {...cell.getCellProps()} className="px-4 py-3">{cell.render('Cell')}</td>
                   ))}
-                </tr>
+                </animated.tr>
               );
             })}
           </tbody>
@@ -184,87 +335,130 @@ const Home = () => {
     );
   };
 
+  // Loading spinner animation
+  const spinnerAnimation = useSpring({
+    from: { rotate: 0 },
+    to: { rotate: 360 },
+    loop: true,
+    config: { duration: 1000 },
+  });
+
   return (
-    <div className="p-4 bg-gray-100 min-h-screen overflow-hidden">
+    <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen mt-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <animated.div 
-            key={index} 
-            style={{ ...fadeInUp, delay: index * 100 }} 
-            className={`p-4 rounded-lg shadow-md text-white ${stat.color} transform transition-all duration-300 hover:scale-105`}
-          >
-            <h2 className="text-2xl font-bold sm:text-3xl">
-              <AnimatedCounter value={stat.count} />
-            </h2>
-            <p className="mt-2 text-lg font-medium">{stat.title}</p>
-            {stat.title === "Total Users" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllUsers}>
-                {showUsers ? "Hide Users" : "View All"}
-              </button>
-            )}
-            {stat.title === "Total Bookings" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllBookings}>
-                {showBookings ? "Hide Bookings" : "View All"}
-              </button>
-            )}
-            {stat.title === "Total Stores" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllStores}>
-                {showStores ? "Hide Stores" : "View All"}
-              </button>
-            )}
-            {stat.title === "Total Bikes" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewAllBikes}>
-                {showBikes ? "Hide Bikes" : "View All"}
-              </button>
-            )}
-            {stat.title === "Today's Bookings" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewTodaysBookings}>
-                View All
-              </button>
-            )}
-            {stat.title === "Ongoing Bookings" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewOngoingBookings}>
-                View All
-              </button>
-            )}
-            {stat.title === "Total Verified Users" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewVerifiedUsers}>
-                View All
-              </button>
-            )}
-            {stat.title === "Total Unverified Users" && (
-              <button className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150" onClick={handleViewUnverifiedUsers}>
-                View All
-              </button>
-            )}
-          </animated.div>
-        ))}
+        {trail.map((style, index) => {
+          const stat = stats[index];
+          const countValue = useCounter(stat.count);
+
+          return (
+            <animated.div
+              key={index}
+              style={style}
+              className={`p-4 rounded-lg shadow-lg text-white ${stat.color} backdrop-blur-sm transition-all duration-300 hover:shadow-xl`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-bold sm:text-3xl">
+                  <animated.span>
+                    {countValue.to(n => Math.floor(n))}
+                  </animated.span>
+                </h2>
+                <span className="text-3xl">{stat.icon}</span>
+              </div>
+              <p className="mt-2 text-lg font-medium">{stat.title}</p>
+              {stat.title === "Total Users" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewAllUsers}
+                >
+                  {showUsers ? "Hide Users" : "View All"}
+                </button>
+              )}
+              {stat.title === "Total Bookings" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewAllBookings}
+                >
+                  {showBookings ? "Hide Bookings" : "View All"}
+                </button>
+              )}
+              {stat.title === "Total Stores" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewAllStores}
+                >
+                  {showStores ? "Hide Stores" : "View All"}
+                </button>
+              )}
+              {stat.title === "Total Bikes" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewAllBikes}
+                >
+                  {showBikes ? "Hide Bikes" : "View All"}
+                </button>
+              )}
+              {stat.title === "Today's Bookings" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewTodaysBookings}
+                >
+                  {showTodaysBookings ? "Hide Bookings" : "View All"}
+                </button>
+              )}
+              {stat.title === "Ongoing Bookings" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewOngoingBookings}
+                >
+                  View All
+                </button>
+              )}
+              {stat.title === "Total Verified Users" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewVerifiedUsers}
+                >
+                  View All
+                </button>
+              )}
+              {stat.title === "Total Unverified Users" && (
+                <button
+                  className="mt-2 bg-white text-gray-800 py-2 px-4 rounded shadow-md w-full hover:bg-gray-100 transition-colors duration-150"
+                  onClick={handleViewUnverifiedUsers}
+                >
+                  View All
+                </button>
+              )}
+            </animated.div>
+          );
+        })}
       </div>
 
       {showUsers && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">All Users</h2>
+        <div id="users-section" className="mt-8">
+          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-blue-900 pl-3">
+            All Users
+          </animated.h2>
           {loading ? (
             <div className="flex justify-center items-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-900"></div>
+              <animated.div
+                style={spinnerAnimation}
+                className="rounded-full h-12 w-12 border-4 border-blue-900 border-t-transparent"
+              ></animated.div>
             </div>
           ) : (
             <>
               <Table
                 columns={[
-                  { Header: 'ID', accessor: 'id' },
+                  { Header: 'Sr. No.', accessor: (row, i) => i + 1 },
                   { Header: 'Name', accessor: 'name' },
-                  { Header: 'Email ID', accessor: 'email' },
                   { Header: 'Contact Number', accessor: 'phoneNumber' },
-                  { Header: 'Aadhar Front', accessor: 'aadharFrontSide', Cell: ({ value }) => <img src={`data:image/jpeg;base64,${value}`} alt="Aadhar Front" className="w-12 h-12 object-cover rounded" /> },
-                  { Header: 'Aadhar Back', accessor: 'aadharBackSide', Cell: ({ value }) => <img src={`data:image/jpeg;base64,${value}`} alt="Aadhar Back" className="w-12 h-12 object-cover rounded" /> },
-                  { Header: 'Driving License', accessor: 'drivingLicense', Cell: ({ value }) => <img src={`data:image/jpeg;base64,${value}`} alt="Driving License" className="w-12 h-12 object-cover rounded" /> },
                 ]}
-                data={users}
+                data={users.slice(1)} // Remove the first row
               />
               <div className="flex justify-between items-center mt-4">
                 <p className="text-sm text-gray-500">
-                  Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, users.length)} of {users.length} entries
+                  Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, users.length)} of {users.length} entries
                 </p>
                 <div className="flex space-x-2">
                   <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
@@ -286,22 +480,29 @@ const Home = () => {
       )}
 
       {showBookings && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">All Bookings</h2>
+        <div id="bookings-section" className="mt-8">
+          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-teal-400 pl-3">
+            All Bookings
+          </animated.h2>
           <Table
             columns={[
-              { Header: 'User ID', accessor: 'userId' },
+              { Header: 'Sr. No.', accessor: (row, i) => i + 1 },
               { Header: 'Booking ID', accessor: 'bookingId' },
+              { Header: 'User', accessor: 'userName' },
               { Header: 'Vehicle', accessor: 'vehicle' },
               { Header: 'Start Date', accessor: 'startDate' },
               { Header: 'End Date', accessor: 'endDate' },
-              { Header: 'Total Amount', accessor: 'totalAmount', Cell: ({ value }) => `₹${value}` },
+              {
+                Header: 'Total Amount',
+                accessor: 'totalAmount',
+                Cell: ({ value }) => `₹${Number(value).toFixed(2)}`
+              },              
             ]}
             data={bookings}
           />
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-500">
-              Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, bookings.length)} of {bookings.length} entries
+              Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, bookings.length)} of {bookings.length} entries
             </p>
             <div className="flex space-x-2">
               <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
@@ -321,11 +522,14 @@ const Home = () => {
       )}
 
       {showStores && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">All Stores</h2>
+        <div id="stores-section" className="mt-8">
+          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-red-400 pl-3">
+            All Stores
+          </animated.h2>
           <Table
             columns={[
-              { Header: 'ID', accessor: 'id' },
+              { Header: 'Sr. No.', accessor: (row, i) => i + 1 },
+              // { Header: 'ID', accessor: 'id' },
               { Header: 'Store Name', accessor: 'name' },
               { Header: 'Location', accessor: 'address' },
             ]}
@@ -333,7 +537,7 @@ const Home = () => {
           />
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-500">
-              Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, stores.length)} of {stores.length} entries
+              Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, stores.length)} of {stores.length} entries
             </p>
             <div className="flex space-x-2">
               <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
@@ -353,10 +557,13 @@ const Home = () => {
       )}
 
       {showBikes && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">All Bikes</h2>
+        <div id="bikes-section" className="mt-8">
+          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-red-500 pl-3">
+            All Bikes
+          </animated.h2>
           <Table
             columns={[
+              { Header: 'Sr. No.', accessor: (row, i) => i + 1 },
               { Header: 'ID', accessor: 'id' },
               { Header: 'Vehicle Number', accessor: 'vehicleRegistrationNumber' },
               { Header: 'Model', accessor: 'model' },
@@ -365,7 +572,7 @@ const Home = () => {
           />
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-500">
-              Showing {currentPage * 5 + 1} to {Math.min((currentPage + 1) * 5, bikes.length)} of {bikes.length} entries
+              Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, bikes.length)} of {bikes.length} entries
             </p>
             <div className="flex space-x-2">
               <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
@@ -384,9 +591,56 @@ const Home = () => {
         </div>
       )}
 
-      <button onClick={scrollToTop} className="fixed bottom-4 right-4 bg-blue-900 text-white p-3 rounded-full shadow-md hover:bg-blue-600 transition-all duration-200 hover:scale-110">
-        ↑
-      </button>
+      {showTodaysBookings && (
+        <div id="todays-bookings-section" className="mt-8">
+          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-blue-900 pl-3">
+            Today's Bookings
+          </animated.h2>
+          <Table
+            columns={[
+              { Header: 'Sr. No.', accessor: (row, i) => i + 1 },
+              { Header: 'Booking ID', accessor: 'bookingId' },
+              { Header: 'User', accessor: 'userName' },
+              { Header: 'Vehicle', accessor: 'vehicle' },
+              { Header: 'Start Date', accessor: 'startDate' },
+              { Header: 'End Date', accessor: 'endDate' },
+              {
+                Header: 'Total Amount',
+                accessor: 'totalAmount',
+                Cell: ({ value }) => `₹${Number(value).toFixed(2)}`
+              },
+
+            ]}
+            data={todaysBookings}
+          />
+          <div className="flex justify-between items-center mt-4">
+            <p className="text-sm text-gray-500">
+              Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, todaysBookings.length)} of {todaysBookings.length} entries
+            </p>
+            <div className="flex space-x-2">
+              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                  {index + 1}
+                </button>
+              ))}
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <animated.button
+        onClick={scrollToTop}
+        style={pulseAnimation}
+        className="fixed bottom-4 right-4 bg-blue-900 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-200 z-50 flex items-center justify-center"
+      >
+        <span className="text-xl">↑</span>
+      </animated.button>
     </div>
   );
 };

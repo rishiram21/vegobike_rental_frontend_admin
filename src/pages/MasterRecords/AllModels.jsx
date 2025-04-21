@@ -4,7 +4,6 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 
 const AllModels = () => {
   const [data, setData] = useState([]);
-  // const [statuses, setStatuses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [formVisible, setFormVisible] = useState(false); // Form state
@@ -36,6 +35,22 @@ const AllModels = () => {
       }
     };
     fetchModels();
+
+    // Scroll to the top of the window when the component mounts
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Fetch brand data
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/brand/all");
+        setBrands(response.data.content);
+      } catch (error) {
+        console.error("Error fetching brand data:", error);
+      }
+    };
+    fetchBrands();
   }, []);
 
   // Add Model
@@ -53,19 +68,6 @@ const AllModels = () => {
       })
       .catch((error) => console.error("Error adding Model data", error));
   };
-
-  // Fetch brand data
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/brand/all");
-        setBrands(response.data.content);
-      } catch (error) {
-        console.error("Error fetching brand data:", error);
-      }
-    };
-    fetchBrands();
-  }, []);
 
   // Save Edit
   const handleSaveEditModel = (e) => {
@@ -122,17 +124,6 @@ const AllModels = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  // Toggle status function
-  // const toggleStatus = (id) => {
-  //   setStatuses((prevStatuses) =>
-  //     prevStatuses.map((row) =>
-  //       row.id === id
-  //         ? { ...row, status: row.status === "Active" ? "Inactive" : "Active" }
-  //         : row
-  //     )
-  //   );
-  // };
 
   return (
     <div className=" bg-gray-100 min-h-screen">
@@ -229,7 +220,6 @@ const AllModels = () => {
                 <tr>
                   <th scope="col" className="px-6 py-3">ID</th>
                   <th scope="col" className="px-6 py-3">Model Name</th>
-                  {/* <th scope="col" className="px-6 py-3">Status</th> */}
                   <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
               </thead>
@@ -247,18 +237,6 @@ const AllModels = () => {
                     <tr key={model.id} className="bg-white border-b hover:bg-gray-50">
                       <td className="px-6 py-3">{model.id}</td>
                       <td className="px-6 py-4">{model.modelName}</td>
-                      {/* <td className="px-6 py-4">
-                        <button
-                          className={`px-2 py-1 rounded ${
-                            statuses.find((row) => row.id === model.id)?.status === "Active"
-                              ? "bg-green-600 hover:bg-green-600 text-white"
-                              : "bg-red-700 hover:bg-red-600 text-white"
-                          }`}
-                          onClick={() => toggleStatus(model.id)}
-                        >
-                          {statuses.find((row) => row.id === model.id)?.status ?? "Active"}
-                        </button>
-                      </td> */}
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-4">
                           <button
@@ -268,12 +246,6 @@ const AllModels = () => {
                             <FaEdit className="mr-2" />
                             Edit
                           </button>
-                          {/* <button
-                            className="px-4 py-2 flex items-center text-white bg-red-800 hover:bg-red-600 rounded"
-                            onClick={() => setConfirmDeleteId(model.id)}
-                          >
-                            <FaTrash />
-                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -353,6 +325,7 @@ const AllModels = () => {
 };
 
 export default AllModels;
+
 
 
 

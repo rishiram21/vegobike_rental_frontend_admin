@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import apiClient from '../api/apiConfig'; 
+import apiClient from '../api/apiConfig';
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +25,7 @@ const AdminLogin = () => {
 
     try {
       const response = await apiClient.post('/admin/login', {
-        username,
+        email,
         password
       }, {
         headers: {
@@ -44,7 +44,7 @@ const AdminLogin = () => {
       }, 300);
     } catch (error) {
       let errorMessage = "Login failed. Please try again.";
-      
+
       if (error.response) {
         const serverError = error.response.data;
         // Handle JWT expiration specifically
@@ -57,7 +57,7 @@ const AdminLogin = () => {
 
       setError(errorMessage);
       setIsLoading(false);
-      
+
       // Shake animation for error
       const form = document.getElementById("login-form");
       form.classList.add("animate-shake");
@@ -68,15 +68,15 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-cover bg-center" 
-         style={{ 
-           backgroundImage: "url('/okbikes_admin.jpg')", 
-           backgroundBlendMode: "overlay", 
-           backgroundColor: "rgba(0, 0, 0, 0.6)", 
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center"
+         style={{
+           backgroundImage: "url('/okbikes_admin.jpg')",
+           backgroundBlendMode: "overlay",
+           backgroundColor: "rgba(0, 0, 0, 0.6)",
          }}>
       <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-purple-900/70 z-0"></div>
-      
-      <div 
+
+      <div
         className={`w-full max-w-md p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md shadow-2xl rounded-lg transition-all duration-500 transform z-10
           ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       >
@@ -87,11 +87,11 @@ const AdminLogin = () => {
             </svg>
           </div>
         </div>
-        
+
         <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">
           Admin Login
         </h2>
-        
+
         {error && (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md border-l-4 border-red-500 animate-fadeIn">
             <div className="flex">
@@ -106,7 +106,7 @@ const AdminLogin = () => {
         <form id="login-form" onSubmit={handleLogin} className="space-y-6">
           <div className="transition-all duration-300 transform delay-100">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Username
+              Email
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -115,11 +115,11 @@ const AdminLogin = () => {
                 </svg>
               </div>
               <input
-                type="text"
+                type="email"
                 className="w-full pl-10 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white transition-all"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
               />
             </div>
@@ -163,8 +163,8 @@ const AdminLogin = () => {
           <button
             type="submit"
             className={`w-full py-3 px-4 text-white font-medium rounded-lg transition-all duration-300 text-center
-              ${isLoading 
-                ? 'bg-blue-400 cursor-not-allowed' 
+              ${isLoading
+                ? 'bg-blue-400 cursor-not-allowed'
                 : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'}`}
             disabled={isLoading}
           >

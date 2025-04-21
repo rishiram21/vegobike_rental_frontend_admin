@@ -63,30 +63,30 @@ const Header = () => {
                         <FaUserCircle className="text-xl" />
                       </div>
                       <div>
-                        <p className="text-gray-800 font-medium">Admin User</p>
-                        <p className="text-gray-500 text-sm">admin@example.com</p>
+                        <p className="text-gray-800 font-medium">Admin Account</p>
+                        <p className="text-gray-500 text-sm">admin@gmail.com</p>
                       </div>
                     </div>
                   </div>
 
                   <ul className="text-gray-700 py-2">
                     <li>
-                      <a
+                      {/* <a
                         href="/profile"
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                       >
                         <FaUser className="text-blue-600" />
                         <span>My Profile</span>
-                      </a>
+                      </a> */}
                     </li>
                     <li>
-                      <a
+                      {/* <a
                         href="/settings"
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                       >
                         <FaCog className="text-blue-600" />
                         <span>Account Settings</span>
-                      </a>
+                      </a> */}
                     </li>
                     <li className="border-t border-gray-100 mt-2">
                       <div className="px-4 py-3">

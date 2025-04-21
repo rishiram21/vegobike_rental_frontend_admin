@@ -56,6 +56,9 @@ const AllBrands = () => {
       }
     };
     fetchBrand();
+
+    // Scroll to the top of the window when the component mounts
+    window.scrollTo(0, 0);
   }, [itemsPerPage]);
 
   // Handle Search Input
@@ -268,7 +271,7 @@ const AllBrands = () => {
               <thead className="text-xs text-gray-700 uppercase bg-gray-200">
                 <tr>
                   <th scope="col" className="px-6 py-3">
-                    ID
+                    Sr. No.
                   </th>
                   <th scope="col" className="px-6 py-3">
                     Image
@@ -295,12 +298,14 @@ const AllBrands = () => {
                     </td>
                   </tr>
                 ) : (
-                  currentPageData.map((brand) => (
+                  currentPageData.map((brand, index) => (
                     <tr
                       key={brand.id}
                       className="bg-white border-b hover:bg-gray-50"
                     >
-                      <td className="px-6 py-3">{brand.id}</td>
+                      <td className="px-6 py-3">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
                       <td className="px-6 py-4">
                         {brand.logo ? (
                           <img
