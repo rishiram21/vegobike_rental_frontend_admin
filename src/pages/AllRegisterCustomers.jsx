@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import apiClient from "../api/apiConfig";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
@@ -21,6 +21,17 @@ const AllRegisterCustomers = () => {
     aadharBackSide: 'PENDING',
     drivingLicense: 'PENDING',
   });
+
+  // Compute verification status based on document statuses
+  const userVerificationStatus = () => {
+    if (Object.values(documentStatus).every(status => status === 'APPROVED')) {
+      return { status: "Verified User", color: "green" };
+    } else if (Object.values(documentStatus).some(status => status === 'REJECTED')) {
+      return { status: "Unverified User", color: "red" };
+    } else {
+      return { status: "Pending Verification", color: "orange" };
+    }
+  };
 
   useEffect(() => {
     window.scrollTo({
@@ -132,15 +143,39 @@ const AllRegisterCustomers = () => {
     }
   };
 
+  // Verification Status Card Component
+  const VerificationStatusCard = () => {
+    const verificationStatus = userVerificationStatus();
+    
+    return (
+      <div className={`bg-${verificationStatus.color === 'green' ? 'green-100' : verificationStatus.color === 'red' ? 'red-100' : 'yellow-100'} p-3 rounded-lg shadow-md border-l-4 border-${verificationStatus.color === 'green' ? 'green-500' : verificationStatus.color === 'red' ? 'red-500' : 'yellow-500'} flex items-center`}>
+        {verificationStatus.color === 'green' ? (
+          <FaCheckCircle className="text-green-500 mr-2" size={20} />
+        ) : verificationStatus.color === 'red' ? (
+          <FaTimesCircle className="text-red-500 mr-2" size={20} />
+        ) : (
+          <div className="w-5 h-5 rounded-full bg-yellow-500 mr-2"></div>
+        )}
+        <span className={`font-medium text-${verificationStatus.color === 'green' ? 'green-700' : verificationStatus.color === 'red' ? 'red-700' : 'yellow-700'}`}>
+          {verificationStatus.status}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen mt-10">
       <ToastContainer />
       {viewMode ? (
         <div className="bg-white p-4 rounded shadow-lg">
-          <h3 className="text-lg font-bold mb-4 md:text-xl">User Details</h3>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold md:text-xl">User Details</h3>
+            <VerificationStatusCard />
+          </div>
+          
           <p><strong>Name:</strong> {selectedUser.name}</p>
-          {/* <p><strong>Email:</strong> {selectedUser.email}</p> */}
           <p><strong>Phone Number:</strong> {selectedUser.phoneNumber}</p>
+          
           <div className="flex space-x-4 mt-10">
             <ProfileImageDetail
               label="Aadhar Front Side"
@@ -198,7 +233,6 @@ const AllRegisterCustomers = () => {
                   <tr>
                     <th scope="col" className="px-4 py-2">Sr. No.</th>
                     <th scope="col" className="px-4 py-2">Name</th>
-                    {/* <th scope="col" className="px-4 py-2">Email</th> */}
                     <th scope="col" className="px-4 py-2">Phone Number</th>
                     <th scope="col" className="px-4 py-2">Action</th>
                   </tr>
@@ -224,7 +258,6 @@ const AllRegisterCustomers = () => {
                       >
                         <td className="px-4 py-3">{indexOfFirstItem + index + 1}</td>
                         <td className="px-4 py-3">{user.name}</td>
-                        {/* <td className="px-4 py-3">{user.email}</td> */}
                         <td className="px-4 py-3">{user.phoneNumber}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center space-x-2">
@@ -388,7 +421,11 @@ const ProfileImageDetail = ({ label, imageData, status, onVerify, onReject, onIm
       </div>
       {status && (
         <div className="mt-2 flex flex-col items-center space-y-2">
-          <div className="bg-white p-2 rounded shadow text-xs absolute top-2 right-2">
+          <div className={`bg-white p-2 rounded shadow text-xs absolute top-2 right-2 ${
+            status === 'APPROVED' ? 'text-green-500 font-bold' : 
+            status === 'REJECTED' ? 'text-red-500 font-bold' : 
+            'text-gray-500'
+          }`}>
             {status}
           </div>
           <div className="flex space-x-2 mt-4">

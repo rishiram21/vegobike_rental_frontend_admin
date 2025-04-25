@@ -5,57 +5,8 @@ import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Plus, Trash2 } from 'lucide-react';
-
-const ImageDetail = ({ label, imageData, status, onVerify, onReject }) => {
-  const getImageSource = () => {
-    if (!imageData) return null;
-    if (typeof imageData === "string" && imageData.startsWith("data:image/")) {
-      return imageData;
-    }
-    return `data:image/png;base64,${imageData}`;
-  };
-
-  return (
-    <div className="border-b border-gray-100 pb-3 flex flex-col items-center">
-      <p className="text-sm text-gray-500 mb-2">{label}</p>
-      <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded-md overflow-hidden relative">
-        {imageData ? (
-          <motion.img
-            src={getImageSource()}
-            alt={label}
-            className="max-w-full max-h-full object-contain"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          />
-        ) : (
-          <p className="font-medium text-gray-500">No Image</p>
-        )}
-        {status && (
-          <div className="absolute top-2 right-2 bg-white p-2 rounded shadow text-xs">
-            {status}
-          </div>
-        )}
-      </div>
-      <div className="mt-2 flex space-x-2">
-        <button
-          className={`px-3 py-1 text-sm ${status === 'APPROVED' ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700'} rounded-md`}
-          onClick={onVerify}
-          disabled={status === 'APPROVED'}
-        >
-          Verify
-        </button>
-        <button
-          className={`px-3 py-1 text-sm ${status === 'REJECTED' ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'} rounded-md`}
-          onClick={onReject}
-          disabled={status === 'REJECTED'}
-        >
-          Reject
-        </button>
-      </div>
-    </div>
-  );
-};
+import ImageDetail from './ImageDetail'; // Assuming ImageDetail is in the same directory
+import Invoice from './Invoice'; // Import the Invoice component
 
 const AllBookings = () => {
   const BookingStatus = {
@@ -82,10 +33,13 @@ const AllBookings = () => {
     drivingLicense: 'PENDING',
   });
   const [statusMessage, setStatusMessage] = useState("");
-
   const [charges, setCharges] = useState([
-    { type: 'Challan', amount: 0, details: '' }
+    { type: 'Challan', amount: 0 }
   ]);
+  const [challans, setChallans] = useState([]);
+  const [damages, setDamages] = useState([]);
+  const [chargesEditable, setChargesEditable] = useState(true);
+  const [showInvoice, setShowInvoice] = useState(false); // State to manage invoice visibility
 
   const calculateDuration = () => {
     const start = new Date(selectedBooking.startDate);
@@ -107,7 +61,7 @@ const AllBookings = () => {
   const chargeTypes = ['Challan', 'Damage', 'Additional'];
 
   const handleAddCharge = () => {
-    setCharges([...charges, { type: 'Challan', amount: 0, details: '' }]);
+    setCharges([...charges, { type: 'Challan', amount: 0 }]);
   };
 
   const handleRemoveCharge = (index) => {
@@ -125,12 +79,6 @@ const AllBookings = () => {
   const handleChangeAmount = (index, value) => {
     const updatedCharges = [...charges];
     updatedCharges[index].amount = value;
-    setCharges(updatedCharges);
-  };
-
-  const handleChangeDetails = (index, value) => {
-    const updatedCharges = [...charges];
-    updatedCharges[index].details = value;
     setCharges(updatedCharges);
   };
 
@@ -157,6 +105,12 @@ const AllBookings = () => {
               store: combinedResponse.data.store,
               vehicleImageUrl: combinedResponse.data.vehicle.image,
               vehiclePackage: combinedResponse.data.vehiclePackage,
+              damage: combinedResponse.data.booking.damage,
+              challan: combinedResponse.data.booking.challan,
+              additionalCharges: combinedResponse.data.booking.additionalCharges,
+              challans: combinedResponse.data.booking.challans || [],
+              damages: combinedResponse.data.booking.damages || [],
+              vehicleNumber: combinedResponse.data.vehicle.vehicleRegistrationNumber, // Include vehicle number
             };
           })
         );
@@ -164,7 +118,12 @@ const AllBookings = () => {
         const bookingWithUsernames = await Promise.all(
           combinedBookings.map(async (booking) => {
             const userResponse = await apiClient.get(`/users/${booking.userId}`);
-            return { ...booking, userName: userResponse.data.name };
+            return {
+              ...booking,
+              userName: userResponse.data.name,
+              userEmail: userResponse.data.email, // Include user email
+              userPhone: userResponse.data.phoneNumber, // Include user phone number
+            };
           })
         );
 
@@ -202,6 +161,20 @@ const AllBookings = () => {
         aadharBackSide: response.data.aadharBackStatus || 'PENDING',
         drivingLicense: response.data.drivingLicenseStatus || 'PENDING',
       });
+
+      // Set charges state
+      setCharges([
+        { type: 'Damage', amount: booking.damage || 0 },
+        { type: 'Challan', amount: booking.challan || 0 },
+        { type: 'Additional', amount: booking.additionalCharges || 0 },
+      ]);
+
+      // Set challans and damages state
+      setChallans(booking.challans || []);
+      setDamages(booking.damages || []);
+
+      // Set charges as editable
+      setChargesEditable(booking.status !== BookingStatus.COMPLETED);
     } catch (error) {
       console.error("Error fetching user details:", error);
     }
@@ -315,30 +288,84 @@ const AllBookings = () => {
   };
 
   const handleViewInvoice = () => {
-    // Implement the logic to view the invoice
-    console.log("View Invoice button clicked");
+    setShowInvoice(true);
+  };
+
+  const handleCloseInvoice = () => {
+    setShowInvoice(false);
+  };
+
+  const calculateLateCharges = () => {
+    if (selectedBooking && new Date(selectedBooking.endDate) < new Date()) {
+      return 0; // Late fee charges
+    }
+    return 0;
+  };
+
+  const handleSaveCharges = async () => {
+    const formatDateTime = (date) => {
+      const isoString = new Date(date).toISOString();
+      return isoString.split('.')[0]; // Remove the milliseconds part
+    };
+
+    const bookingRequestDto = {
+      vehicleId: selectedBooking.vehicle.id,
+      userId: selectedBooking.userId,
+      packageId: selectedBooking.vehiclePackage.id,
+      totalAmount: selectedBooking.totalAmount,
+      addressType: selectedBooking.addressType,
+      deliveryLocation: selectedBooking.address,
+      deliverySelected: selectedBooking.deliverySelected,
+      startTime: formatDateTime(selectedBooking.startDate), // Format datetime correctly
+      endTime: formatDateTime(selectedBooking.endDate), // Format datetime correctly
+      damage: charges.find(charge => charge.type === 'Damage')?.amount || 0,
+      challan: charges.find(charge => charge.type === 'Challan')?.amount || 0,
+      additionalCharges: charges.find(charge => charge.type === 'Additional')?.amount || 0,
+    };
+
+    try {
+      const response = await apiClient.put(`/booking/${selectedBooking.bookingId}`, bookingRequestDto);
+      console.log("Booking updated successfully:", response.data);
+      toast.success("Booking updated successfully!");
+      setStatusMessage("Booking updated successfully!");
+
+      // Make charges read-only
+      setChargesEditable(false);
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      toast.error("Failed to update booking.");
+      setStatusMessage("Failed to update booking.");
+    }
   };
 
   return (
     <div className="bg-gray-100 min-h-screen mt-6">
       <ToastContainer />
-      {viewMode ? (
+      {showInvoice ? (
+        <Invoice
+          booking={selectedBooking}
+          charges={charges}
+          lateCharges={calculateLateCharges()}
+          challans={challans}
+          damages={damages}
+          userPhone={selectedBooking?.userPhone} // Pass user phone number
+          vehicleNumber={selectedBooking?.vehicleNumber} // Pass vehicle number
+        />
+      ) : viewMode ? (
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <div className="">
-  <div className="flex justify-between items-center mb-6 border-b pb-3">
-    <h3 className="text-xl font-bold text-blue-900">Booking Details</h3>
-
-    {selectedBooking && selectedBooking.status === 'COMPLETED' && (
-      <button
-        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-        onClick={handleViewInvoice}
-      >
-        View Invoice
-      </button>
-    )}
-  </div>
-</div>
-
+            <div className="flex justify-between items-center mb-6 border-b pb-3">
+              <h3 className="text-xl font-bold text-blue-900">Booking Details</h3>
+              {selectedBooking && selectedBooking.status === 'COMPLETED' && (
+                <button
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  onClick={handleViewInvoice}
+                >
+                  View Invoice
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -348,7 +375,7 @@ const AllBookings = () => {
                   <img
                     src={selectedBooking.vehicleImageUrl}
                     alt={selectedBooking.vehicle.model}
-                    className="rounded-t-lg h-52 w-full object-cover"
+                    className="rounded-t-lg h-52 w-full object-contain"
                   />
                   <div className="bg-gray-50 p-4 rounded-b-lg flex-grow">
                     <h4 className="font-semibold text-blue-900 text-lg">{selectedBooking.vehicle.model}</h4>
@@ -386,6 +413,10 @@ const AllBookings = () => {
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">Convenience Fee:</span>
                     <span className="font-medium">₹2.00</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-600">Late Charges:</span>
+                    <span className="font-medium">₹{calculateLateCharges()}</span>
                   </div>
                   <div className="pt-2 mt-1">
                     <div className="flex justify-between">
@@ -512,6 +543,7 @@ const AllBookings = () => {
                         value={charge.type}
                         onChange={(e) => handleChangeType(index, e.target.value)}
                         className="block w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                        disabled={!chargesEditable}
                       >
                         {chargeTypes.map((type) => (
                           <option key={type} value={type}>{type}</option>
@@ -526,20 +558,11 @@ const AllBookings = () => {
                         onChange={(e) => handleChangeAmount(index, e.target.value)}
                         placeholder="Amount"
                         className="block w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                        disabled={!chargesEditable}
                       />
                     </div>
 
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={charge.details}
-                        onChange={(e) => handleChangeDetails(index, e.target.value)}
-                        placeholder="Details"
-                        className="block w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    {charges.length > 1 && (
+                    {charges.length > 1 && chargesEditable && (
                       <button
                         type="button"
                         onClick={() => handleRemoveCharge(index)}
@@ -551,13 +574,25 @@ const AllBookings = () => {
                   </div>
                 ))}
 
-                <button
-                  type="button"
-                  onClick={handleAddCharge}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors mt-2"
-                >
-                  <Plus size={16} className="mr-2" /> Add Charge
-                </button>
+                {chargesEditable && (
+                  <button
+                    type="button"
+                    onClick={handleAddCharge}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors mt-2"
+                  >
+                    <Plus size={16} className="mr-2" /> Add Charge
+                  </button>
+                )}
+
+                {chargesEditable && (
+                  <button
+                    type="button"
+                    onClick={handleSaveCharges}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors mt-2"
+                  >
+                    Save
+                  </button>
+                )}
               </div>
 
               <div className="w-full mt-6">

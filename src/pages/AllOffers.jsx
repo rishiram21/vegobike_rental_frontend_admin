@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import apiClient from "../api/apiConfig";
+import { YoutubeIcon } from "lucide-react";
 
 const Allcoupons = () => {
   const [data, setData] = useState([]);
@@ -19,6 +20,8 @@ const Allcoupons = () => {
     totalCoupon: "",
     remainingCoupon: "",
     isActive: true,
+    startDate: "",
+    endDate: "",
   });
   const [loading, setLoading] = useState(true);
   const [itemsPerPage] = useState(10);
@@ -87,6 +90,8 @@ const Allcoupons = () => {
       totalCoupon: coupon.totalCoupon,
       remainingCoupon: coupon.remainingCoupon,
       isActive: coupon.isActive,
+      startDate: coupon.startDate,
+      endDate: coupon.endDate,
     });
     setFormVisible(true);
   };
@@ -110,6 +115,8 @@ const Allcoupons = () => {
       totalCoupon: "",
       remainingCoupon: "",
       isActive: true,
+      startDate: "",
+      endDate: "",
     });
     setFormVisible(false);
   };
@@ -277,6 +284,38 @@ const Allcoupons = () => {
                 />
               </div>
               <div className="col-span-1">
+                <label className="block mb-2 font-medium">Start Date</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  className="w-full border border-gray-300 p-2 rounded"
+                  value={formData.startDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      startDate: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+              <div className="col-span-1">
+                <label className="block mb-2 font-medium">End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  className="w-full border border-gray-300 p-2 rounded"
+                  value={formData.endDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      endDate: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Status</label>
                 <select
                   name="isActive"
@@ -329,9 +368,6 @@ const Allcoupons = () => {
                   <th scope="col" className="px-4 py-2">
                     SR. NO.
                   </th>
-                  {/* <th scope="col" className="px-4 py-2">
-                    ID
-                  </th> */}
                   <th scope="col" className="px-4 py-2">
                     Coupon Name
                   </th>
@@ -348,6 +384,12 @@ const Allcoupons = () => {
                     Remaining Coupons
                   </th>
                   <th scope="col" className="px-4 py-2">
+                    Start Date
+                  </th>
+                  <th scope="col" className="px-4 py-2">
+                    End Date
+                  </th>
+                  <th scope="col" className="px-4 py-2">
                     Status
                   </th>
                   <th scope="col" className="px-4 py-2">
@@ -358,13 +400,13 @@ const Allcoupons = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="9" className="text-center py-4">
+                    <td colSpan="10" className="text-center py-4">
                       Loading...
                     </td>
                   </tr>
                 ) : currentData.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className="text-center py-4">
+                    <td colSpan="10" className="text-center py-4">
                       No data found
                     </td>
                   </tr>
@@ -375,12 +417,13 @@ const Allcoupons = () => {
                       className="bg-white border-b hover:bg-gray-50"
                     >
                       <td className="px-4 py-3">{startingSerialNumber + index}</td>
-                      {/* <td className="px-4 py-3">{coupon.couponId}</td> */}
                       <td className="px-4 py-3">{coupon.couponName}</td>
                       <td className="px-4 py-3">{coupon.couponCode}</td>
                       <td className="px-4 py-3">{coupon.discountValue}</td>
                       <td className="px-4 py-3">{coupon.totalCoupon}</td>
                       <td className="px-4 py-3">{coupon.remainingCoupon}</td>
+                      <td className="px-4 py-3">{coupon.startDate}</td>
+                      <td className="px-4 py-3">{coupon.endDate}</td>
                       <td className="px-4 py-3">
                         <button
                           className={`px-2 py-1 rounded ${

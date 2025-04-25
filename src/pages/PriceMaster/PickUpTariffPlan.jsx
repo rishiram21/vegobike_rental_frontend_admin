@@ -1,6 +1,8 @@
+
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const PickUpTariffPlan = () => {
   const [data, setData] = useState([]);
@@ -22,36 +24,40 @@ const PickUpTariffPlan = () => {
   const [category, setCategories] = useState([]);
   const [itemsPerPage] = useState(10);
 
-  useEffect(() => {
-    const fetchPickUpTariffPrices = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("http://localhost:8080/package/all");
-        if (Array.isArray(response.data.content)) {
-          setData(response.data.content);
-        } else {
-          console.error("Invalid response format");
-        }
-      } catch (error) {
-        console.error("Error fetching price data:", error);
-      } finally {
-        setLoading(false);
+  const fetchPickUpTariffPrices = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:8080/package/all");
+      if (Array.isArray(response.data.content)) {
+        setData(response.data.content);
+      } else {
+        console.error("Invalid response format");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching price data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPickUpTariffPrices();
     fetchCategory();
   }, []);
 
   const handleAddPrice = (e) => {
     e.preventDefault();
+    const payload = {
+      vehicleCategoryId: formData.vehicleCategoryId,
+      price: formData.price,
+      deposit: formData.deposit,
+      hours: formData.periodType === "Hours" ? Number(formData.periodValue) : 0,
+      days: formData.periodType === "Days" ? Number(formData.periodValue) : 0,
+    };
     axios
-      .post("http://localhost:8080/package/add", formData)
-      .then((response) => {
-        if (!Array.isArray(data)) {
-          setData([response.data]);
-        } else {
-          setData([...data, response.data]);
-        }
+      .post("http://localhost:8080/package/add", payload)
+      .then(() => {
+        fetchPickUpTariffPrices(); // <== fetch updated list
         resetForm();
       })
       .catch((error) => console.error("Error adding package data", error));
@@ -68,17 +74,20 @@ const PickUpTariffPlan = () => {
 
   const handleSaveEdit = (e) => {
     e.preventDefault();
+    const payload = {
+      vehicleCategoryId: formData.vehicleCategoryId,
+      price: formData.price,
+      deposit: formData.deposit,
+      hours: formData.periodType === "Hours" ? Number(formData.periodValue) : 0,
+      days: formData.periodType === "Days" ? Number(formData.periodValue) : 0,
+    };
     axios
-      .put(`http://localhost:8080/package/${editingId}`, formData)
-      .then((response) => {
-        setData(
-          data.map((pickUpTariffplan) =>
-            pickUpTariffplan.id === editingId ? response.data : pickUpTariffplan
-          )
-        );
+      .put(`http://localhost:8080/package/${editingId}`, payload)
+      .then(() => {
+        fetchPickUpTariffPrices(); // <== fetch updated list
         resetForm();
       })
-      .catch((error) => console.error("Error Saving Data:", error));
+      .catch((error) => console.error("Error saving data:", error));
   };
 
   const handleEditTariffPlan = (pickuptariffplan) => {
@@ -93,6 +102,16 @@ const PickUpTariffPlan = () => {
     setFormVisible(true);
   };
 
+  const handleToggleStatus = async (id) => {
+    try {
+      await axios.put(`http://localhost:8080/package/toggle/${id}`);
+      toast.success("Status updated successfully");
+      fetchPickUpTariffPrices(); // instead of fetchData()
+    } catch (error) {
+      toast.error("Failed to update status")
+    }
+  }
+
   const resetForm = () => {
     setEditingId(null);
     setFormData({
@@ -104,15 +123,6 @@ const PickUpTariffPlan = () => {
     });
     setFormVisible(false);
   };
-
-  const handleDeletepackage = (id) => {
-    axios
-      .delete(`http://localhost:8080/package/${id}`)
-      .then(() => setData(data.filter((model) => model.id !== id)))
-      .catch((error) => console.error("Error deleting data:", error))
-      .finally(() => setConfirmDeleteId(null));
-  };
-
   const filteredData = data.filter(
     (item) =>
       item.vehicleCategory &&
@@ -332,13 +342,14 @@ const PickUpTariffPlan = () => {
                             Edit
                           </button>
                           <button
-                            className="px-4 py-2 flex items-center text-white bg-red-800 hover:bg-red-600 rounded"
-                            onClick={() =>
-                              setConfirmDeleteId(pickuptariffplan.id)
-                            }
+                            onClick={() => handleToggleStatus(pickuptariffplan.id)}
+                            className={`px-4 py-2 rounded text-white ${
+                              pickuptariffplan.active ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+                            }`}
                           >
-                            <FaTrash />
+                            {pickuptariffplan.active ? "Activate" : "Disable" }
                           </button>
+
                         </div>
                       </td>
                     </tr>
