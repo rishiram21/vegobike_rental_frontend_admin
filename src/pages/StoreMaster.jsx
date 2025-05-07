@@ -100,6 +100,7 @@ const StoreMaster = () => {
         setData([...data, response.data]);
         resetForm();
         fetchStores();
+        window.location.reload();
       })
       .catch((error) => console.error("Error adding store data", error));
   };
@@ -114,6 +115,7 @@ const StoreMaster = () => {
         );
         resetForm();
         fetchStores();
+        window.location.reload();
       })
       .catch((error) => console.error("Error saving data:", error));
   };
@@ -142,8 +144,32 @@ const StoreMaster = () => {
       .delete(`/store/${id}`)
       .then(() => setData(data.filter((store) => store.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
-      .finally(() => setConfirmDeleteId(null));
+      .finally(() => {
+        setConfirmDeleteId(null);
+        window.location.reload();
+      });
   };
+
+  const toggleStoreStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    try {
+        console.log(`Updating store status for store ID: ${id} to status: ${newStatus}`);
+        const response = await apiClient.put(`/store/${id}/status`, null, {
+            params: { status: newStatus }
+        });
+        if (response.status === 200) {
+            console.log("Store status updated successfully");
+            setData((prevData) =>
+                prevData.map((store) =>
+                    store.id === id ? { ...store, status: newStatus } : store
+                )
+            );
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error("Error updating store status:", error);
+    }
+};
 
   const resetForm = () => {
     setEditingId(null);
@@ -174,18 +200,17 @@ const StoreMaster = () => {
     <div className="bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mt-4 mb-4">
         {/* <h1 className="text-xl font-bold text-gray-800 md:text-2xl">All Stores</h1> */}
-        
       </div>
 
       {formVisible ? (
-        <div className="bg-white p-4 rounded-lg shadow-lg">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
           <h2 className="text-lg font-bold mb-4 md:text-xl">
             {editingId ? "Edit Store" : "Add New Store"}
           </h2>
           <form onSubmit={editingId ? handleSaveEdit : handledAddStore}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="col-span-1">
-                <label className="font-medium">Store Name</label>
+                <label className="block mb-2 font-medium">Store Name</label>
                 <input
                   type="text"
                   name="storeName"
@@ -198,7 +223,7 @@ const StoreMaster = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Store Owner</label>
                 <input
                   type="text"
@@ -211,12 +236,14 @@ const StoreMaster = () => {
                       storeOwner: e.target.value,
                     })
                   }
+                  required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Contact Number</label>
                 <input
-                  type="number"
+                  type="tel"
+                  maxLength={12}
                   name="storeContactNumber"
                   className="w-full border border-gray-300 p-2 rounded"
                   value={formData.storePhone}
@@ -229,7 +256,7 @@ const StoreMaster = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Address</label>
                 <input
                   type="text"
@@ -242,7 +269,7 @@ const StoreMaster = () => {
                   required
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">City</label>
                 <select
                   name="cityId"
@@ -252,6 +279,7 @@ const StoreMaster = () => {
                     setFormData({ ...formData, cityId: e.target.value });
                     fetchSubcities(e.target.value);
                   }}
+                  required
                 >
                   <option value="" disabled>
                     Select a city
@@ -263,7 +291,7 @@ const StoreMaster = () => {
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Subcity/Area</label>
                 <select
                   name="subCityId"
@@ -273,6 +301,7 @@ const StoreMaster = () => {
                     setFormData({ ...formData, subCityId: e.target.value })
                   }
                   disabled={!formData.cityId}
+                  required
                 >
                   <option value="" disabled>
                     Select a subcity/area
@@ -284,7 +313,7 @@ const StoreMaster = () => {
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Google Map URL</label>
                 <input
                   type="text"
@@ -299,7 +328,7 @@ const StoreMaster = () => {
                   }
                 />
               </div>
-              <div className="mb-4">
+              <div className="col-span-1">
                 <label className="block mb-2 font-medium">Store Photos</label>
                 <input
                   type="file"
@@ -333,7 +362,7 @@ const StoreMaster = () => {
                 )}
               </div>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end mt-6">
               <button
                 type="submit"
                 className="px-4 py-2 mr-2 text-white bg-blue-900 rounded hover:bg-blue-600"
@@ -355,13 +384,13 @@ const StoreMaster = () => {
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-blue-900">All Stores</h3>
             {!formVisible && (
-          <button
-            onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
-          >
-            + Add Store
-          </button>
-        )}
+              <button
+                onClick={() => setFormVisible(true)}
+                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+              >
+                + Add Store
+              </button>
+            )}
             <input
               type="text"
               placeholder="Search by store name..."
@@ -380,6 +409,7 @@ const StoreMaster = () => {
                   <th scope="col" className="px-6 py-3">Store Name</th>
                   <th scope="col" className="px-6 py-3">Contact Number</th>
                   <th scope="col" className="px-6 py-3">Address</th>
+                  <th scope="col" className="px-6 py-3">Status</th>
                   <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
               </thead>
@@ -417,6 +447,7 @@ const StoreMaster = () => {
                       <td className="px-6 py-4">{store.name}</td>
                       <td className="px-6 py-4">{store.phone}</td>
                       <td className="px-6 py-4">{store.address}</td>
+                      <td className="px-6 py-4">{store.status}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
@@ -433,6 +464,13 @@ const StoreMaster = () => {
                             <FaTrash className="mr-1.5" size={14} />
                             Delete
                           </button> */}
+
+                          <button
+                              className={`px-4 py-2 flex items-center text-white rounded ${store.status === "ACTIVE" ? "bg-green-500 hover:bg-green-600": "bg-red-500 hover:bg-red-600"}`}
+                              onClick={()=> toggleStoreStatus(store.id, store.status)}>
+
+                                {store.status === "ACTIVE" ? "Activate" : "Deactivate"}
+                          </button>
                         </div>
                       </td>
                     </tr>
