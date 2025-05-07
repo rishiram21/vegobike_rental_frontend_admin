@@ -158,7 +158,7 @@ const Sidebar = () => {
             </div>
           </button>
           <h1 className="text-white font-bold text-lg">
-            OKBIKES
+            VegoBike
           </h1>
         </div>
 
@@ -275,7 +275,7 @@ const Sidebar = () => {
         {((windowWidth >= 768 && !isDesktopCollapsed) || (windowWidth < 768 && isMenuOpen)) && (
           <div className="p-4 border-t border-indigo-800">
             <div className="text-xs text-indigo-300 text-center">
-              OKBIKES ADMIN © 2025
+              VegoBike ADMIN © 2025
             </div>
           </div>
         )}
