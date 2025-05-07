@@ -1,1 +1,1 @@
-OkBikes Frontend Admin
+Vego Bike Frontend Admin
