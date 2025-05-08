@@ -124,7 +124,7 @@ const Home = () => {
   }, [currentPage]);
 
   const stats = [
-    { title: "Today's Bookings", count: todaysBookings.length, color: "bg-blue-900", icon: "📅" },
+    { title: "Today's Bookings", count: todaysBookings.length, color: "bg-indigo-900", icon: "📅" },
     { title: "Ongoing Bookings", count: ongoingBookings.length, color: "bg-yellow-400", icon: "🔄" },
     { title: "Total Bikes", count: bikes.length, color: "bg-red-500", icon: "🏍️" },
     { title: "Total Bookings", count: bookings.length, color: "bg-teal-400", icon: "📚" },
@@ -354,7 +354,7 @@ const Home = () => {
     return (
       <animated.div style={tableAnimation} className="overflow-x-auto rounded-lg shadow-lg border border-gray-200 bg-white">
         <table {...getTableProps()} className="w-full text-sm text-left text-gray-700">
-          <thead className="text-xs text-white uppercase bg-blue-900">
+          <thead className="text-xs text-white uppercase bg-indigo-900">
             {headerGroups.map(headerGroup => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map(column => (
@@ -370,7 +370,7 @@ const Home = () => {
                 <animated.tr
                   {...row.getRowProps()}
                   style={rowAnimations[rowIndex]}
-                  className={`${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-150`}
+                  className={`${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-indigo-50 transition-colors duration-150`}
                 >
                   {row.cells.map(cell => (
                     <td {...cell.getCellProps()} className="px-4 py-3">{cell.render('Cell')}</td>
@@ -485,14 +485,14 @@ const Home = () => {
 
       {showUsers && (
   <div id="users-section" className="mt-8">
-    <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-blue-900 pl-3">
+    <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-indigo-900 pl-3">
       All Users
     </animated.h2>
     {loading ? (
       <div className="flex justify-center items-center h-32">
         <animated.div
           style={spinnerAnimation}
-          className="rounded-full h-12 w-12 border-4 border-blue-900 border-t-transparent"
+          className="rounded-full h-12 w-12 border-4 border-indigo-900 border-t-transparent"
         ></animated.div>
       </div>
     ) : (
@@ -510,15 +510,15 @@ const Home = () => {
             Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, displayedUsers.length)} of {displayedUsers.length} entries
           </p>
           <div className="flex space-x-2">
-            <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+            <button className="px-3 py-1 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
               Previous
             </button>
             {[...Array(totalPages)].map((_, index) => (
-              <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+              <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-indigo-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                 {index + 1}
               </button>
             ))}
-            <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+            <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-indigo-900 text-white hover:bg-indigo-600"}`}>
               Next
             </button>
           </div>
@@ -554,15 +554,15 @@ const Home = () => {
               Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, ongoingBookings.length)} of {ongoingBookings.length} entries
             </p>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+              <button className="px-3 py-1 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
                 Previous
               </button>
               {[...Array(totalPages)].map((_, index) => (
-                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-indigo-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                   {index + 1}
                 </button>
               ))}
-              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-indigo-900 text-white hover:bg-indigo-600"}`}>
                 Next
               </button>
             </div>
@@ -596,15 +596,15 @@ const Home = () => {
               Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, bookings.length)} of {bookings.length} entries
             </p>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+              <button className="px-3 py-1 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
                 Previous
               </button>
               {[...Array(totalPages)].map((_, index) => (
-                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-indigo-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                   {index + 1}
                 </button>
               ))}
-              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-indigo-900 text-white hover:bg-indigo-600"}`}>
                 Next
               </button>
             </div>
@@ -631,15 +631,15 @@ const Home = () => {
               Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, stores.length)} of {stores.length} entries
             </p>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+              <button className="px-3 py-1 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
                 Previous
               </button>
               {[...Array(totalPages)].map((_, index) => (
-                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-indigo-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                   {index + 1}
                 </button>
               ))}
-              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-indigo-900 text-white hover:bg-indigo-600"}`}>
                 Next
               </button>
             </div>
@@ -666,15 +666,15 @@ const Home = () => {
               Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, bikes.length)} of {bikes.length} entries
             </p>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+              <button className="px-3 py-1 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
                 Previous
               </button>
               {[...Array(totalPages)].map((_, index) => (
-                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-indigo-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                   {index + 1}
                 </button>
               ))}
-              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-indigo-900 text-white hover:bg-indigo-600"}`}>
                 Next
               </button>
             </div>
@@ -684,7 +684,7 @@ const Home = () => {
 
       {showTodaysBookings && (
         <div id="todays-bookings-section" className="mt-8">
-          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-blue-900 pl-3">
+          <animated.h2 style={sectionHeaderAnimation} className="text-xl font-bold mb-4 text-gray-800 border-l-4 border-indigo-900 pl-3">
             Today's Bookings
           </animated.h2>
           <Table
@@ -708,15 +708,15 @@ const Home = () => {
               Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, todaysBookings.length)} of {todaysBookings.length} entries
             </p>
             <div className="flex space-x-2">
-              <button className="px-3 py-1 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
+              <button className="px-3 py-1 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150" disabled={currentPage === 0} onClick={() => setCurrentPage((prev) => prev - 1)}>
                 Previous
               </button>
               {[...Array(totalPages)].map((_, index) => (
-                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-blue-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
+                <button key={index} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === index ? "bg-indigo-900 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`} onClick={() => setCurrentPage(index)}>
                   {index + 1}
                 </button>
               ))}
-              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-blue-900 text-white hover:bg-blue-600"}`}>
+              <button disabled={currentPage === totalPages - 1} onClick={() => setCurrentPage((prev) => prev + 1)} className={`px-3 py-1 rounded transition-colors duration-150 ${currentPage === totalPages - 1 ? "bg-gray-300 text-gray-500" : "bg-indigo-900 text-white hover:bg-indigo-600"}`}>
                 Next
               </button>
             </div>
@@ -727,7 +727,7 @@ const Home = () => {
       <animated.button
         onClick={scrollToTop}
         style={pulseAnimation}
-        className="fixed bottom-4 right-4 bg-blue-900 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-200 z-50 flex items-center justify-center"
+        className="fixed bottom-4 right-4 bg-indigo-900 text-white p-3 rounded-full shadow-lg hover:bg-indigo-600 transition-all duration-200 z-50 flex items-center justify-center"
       >
         <span className="text-xl">↑</span>
       </animated.button>

@@ -171,7 +171,7 @@ const AllRegisterCustomers = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen mt-10">
+    <div className="bg-gray-100 min-h-screen">
       <ToastContainer />
       {viewMode ? (
         <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -219,24 +219,23 @@ const AllRegisterCustomers = () => {
       ) : (
         <>
           <div className="flex justify-between items-center mt-4 mb-4">
-            <h1 className="text-xl font-bold text-gray-800 md:text-2xl">All Registered Users List</h1>
+            
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-indigo-900">All Registered Users List</h3>
                 <input
                   type="text"
                   placeholder="Search By User Name..."
-                  className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
+                  className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-              </div>
             </div>
             <div className="relative overflow-x-auto shadow-md rounded-lg">
-              <table className="w-full text-sm text-left text-gray-500">
-                <thead className="text-xs uppercase bg-blue-900 text-white">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs uppercase bg-indigo-900 text-white">
                   <tr>
                     <th scope="col" className="px-6 py-3">No.</th>
                     <th scope="col" className="px-6 py-3">Name</th>
@@ -249,7 +248,7 @@ const AllRegisterCustomers = () => {
                     <tr>
                       <td colSpan="6" className="text-center py-4">
                         <div className="flex justify-center items-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-900"></div>
                           <span className="ml-2">Loading...</span>
                         </div>
                       </td>
@@ -264,7 +263,7 @@ const AllRegisterCustomers = () => {
                     currentData.map((user, index) => (
                       <tr
                         key={user.id}
-                        className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                        className={`border-b hover:bg-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                       >
                         <td className="px-6 py-4 font-medium">{indexOfFirstItem + index + 1}</td>
                         <td className="px-6 py-4">{user.name}</td>
@@ -272,7 +271,7 @@ const AllRegisterCustomers = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-2">
                             <button
-                              className="px-3 py-1.5 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
+                              className="px-3 py-1.5 flex items-center text-white bg-indigo-800 hover:bg-indigo-600 rounded"
                               onClick={() => handleView(user)}
                             >
                               <FaEye className="mr-1.5" size={14} />
@@ -292,7 +291,7 @@ const AllRegisterCustomers = () => {
               </p>
               <div className="flex space-x-1">
                 <button
-                  className="px-3 py-1.5 text-sm text-white bg-blue-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1.5 text-sm text-white bg-indigo-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                 >
@@ -304,7 +303,7 @@ const AllRegisterCustomers = () => {
                       key={index}
                       className={`px-3 py-1.5 rounded-md text-sm ${
                         currentPage === index + 1
-                          ? "bg-blue-800 text-white"
+                          ? "bg-indigo-800 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       } transition-colors`}
                       onClick={() => setCurrentPage(index + 1)}
@@ -319,7 +318,7 @@ const AllRegisterCustomers = () => {
                         key={index}
                         className={`px-3 py-1.5 rounded-md text-sm ${
                           currentPage === index + 1
-                            ? "bg-blue-800 text-white"
+                            ? "bg-indigo-800 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         } transition-colors`}
                         onClick={() => setCurrentPage(index + 1)}
@@ -330,7 +329,7 @@ const AllRegisterCustomers = () => {
                     {currentPage > 3 && <span className="px-2 py-1.5">...</span>}
                     {currentPage > 3 && currentPage < totalPages - 2 && (
                       <button
-                        className="px-3 py-1.5 rounded-md text-sm bg-blue-800 text-white"
+                        className="px-3 py-1.5 rounded-md text-sm bg-indigo-800 text-white"
                       >
                         {currentPage}
                       </button>
@@ -341,7 +340,7 @@ const AllRegisterCustomers = () => {
                         key={totalPages - 2 + index}
                         className={`px-3 py-1.5 rounded-md text-sm ${
                           currentPage === totalPages - 2 + index
-                            ? "bg-blue-800 text-white"
+                            ? "bg-indigo-800 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         } transition-colors`}
                         onClick={() => setCurrentPage(totalPages - 2 + index)}
@@ -357,7 +356,7 @@ const AllRegisterCustomers = () => {
                   className={`px-3 py-1.5 rounded-md text-sm ${
                     currentPage === totalPages
                       ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-800 text-white hover:bg-blue-600"
+                      : "bg-indigo-800 text-white hover:bg-indigo-600"
                   } transition-colors`}
                 >
                   Next
@@ -441,7 +440,7 @@ const ProfileImageDetail = ({ label, imageData, status, onVerify, onReject, onIm
     <div className="w-1/3 relative">
       <p className="text-sm font-medium text-gray-700 mb-2">{label}</p>
       <div
-        className={`w-full h-64 bg-gray-50 border ${imageData ? 'border-blue-400 hover:border-blue-600' : 'border-gray-300'}
+        className={`w-full h-64 bg-gray-50 border ${imageData ? 'border-indigo-400 hover:border-indigo-600' : 'border-gray-300'}
           flex items-center justify-center rounded-md overflow-hidden transition-all duration-300
           ${imageData ? 'cursor-pointer hover:shadow-lg' : 'cursor-default'}`}
         onClick={handleImageClick}

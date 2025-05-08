@@ -561,7 +561,7 @@
 //             <div className="flex justify-end">
 //               <button
 //                 type="submit"
-//                 className="px-4 py-2 mr-2 text-white bg-blue-900 rounded hover:bg-blue-600"
+//                 className="px-4 py-2 mr-2 text-white bg-indigo-900 rounded hover:bg-indigo-600"
 //               >
 //                 {editingId ? "Save" : "Add"}
 //               </button>
@@ -579,11 +579,11 @@
 //         <div className="bg-white p-6 rounded-lg shadow-lg">
 //           <div className="flex justify-between items-center mb-6">
 //   <div className="flex items-center gap-4">
-//     <h3 className="text-xl font-bold text-blue-900">All Bikes</h3>
+//     <h3 className="text-xl font-bold text-indigo-900">All Bikes</h3>
 //     {!formVisible && (
 //       <button
 //         onClick={() => setFormVisible(true)}
-//         className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+//         className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
 //       >
 //         + Add Bike
 //       </button>
@@ -593,7 +593,7 @@
 //   <input
 //     type="text"
 //     placeholder="Search by Brand Name..."
-//     className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
+//     className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
 //     value={searchQuery}
 //     onChange={(e) => setSearchQuery(e.target.value)}
 //   />
@@ -601,7 +601,7 @@
 
 //           <div className="overflow-x-auto shadow-md rounded-lg">
 //             <table className="w-full text-sm text-left">
-//               <thead className="text-xs uppercase bg-blue-900 text-white">
+//               <thead className="text-xs uppercase bg-indigo-900 text-white">
 //                 <tr>
 //                   <th scope="col" className="px-6 py-3">No.</th>
 //                   <th scope="col" className="px-6 py-3">Brand Name</th>
@@ -616,7 +616,7 @@
 //                   <tr>
 //                     <td colSpan="7" className="text-center py-6">
 //                       <div className="flex justify-center items-center">
-//                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
+//                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-900"></div>
 //                         <span className="ml-2">Loading...</span>
 //                       </div>
 //                     </td>
@@ -629,7 +629,7 @@
 //                   </tr>
 //                 ) : (
 //                   currentData.map((bike, index) => (
-//                     <tr key={bike.id} className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+//                     <tr key={bike.id} className={`border-b hover:bg-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
 //                       <td className="px-6 py-4 font-medium">{indexOfFirstItem + index + 1}</td>
 //                       <td className="px-6 py-4">{bike.brand}</td>
 //                       <td className="px-6 py-4">{bike.categoryName}</td>
@@ -638,7 +638,7 @@
 //                       <td className="px-6 py-4">
 //                         <div className="flex items-center space-x-2">
 //                           <button
-//                             className="px-3 py-1.5 flex items-center text-white bg-blue-700 hover:bg-blue-800 rounded-md transition-colors shadow-sm"
+//                             className="px-3 py-1.5 flex items-center text-white bg-indigo-700 hover:bg-indigo-800 rounded-md transition-colors shadow-sm"
 //                             onClick={() => handleEditBike(bike)}
 //                           >
 //                             <FaEdit className="mr-1.5" size={14} />
@@ -658,7 +658,7 @@
 //             </p>
 //             <div className="flex space-x-1">
 //               <button
-//                 className="px-3 py-1.5 text-sm text-white bg-blue-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+//                 className="px-3 py-1.5 text-sm text-white bg-indigo-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
 //                 disabled={currentPage === 1}
 //                 onClick={() => setCurrentPage((prev) => prev - 1)}
 //               >
@@ -670,7 +670,7 @@
 //                     key={index}
 //                     className={`px-3 py-1.5 rounded-md text-sm ${
 //                       currentPage === index + 1
-//                         ? "bg-blue-800 text-white"
+//                         ? "bg-indigo-800 text-white"
 //                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
 //                     } transition-colors`}
 //                     onClick={() => setCurrentPage(index + 1)}
@@ -685,7 +685,7 @@
 //                       key={index}
 //                       className={`px-3 py-1.5 rounded-md text-sm ${
 //                         currentPage === index + 1
-//                           ? "bg-blue-800 text-white"
+//                           ? "bg-indigo-800 text-white"
 //                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
 //                       } transition-colors`}
 //                       onClick={() => setCurrentPage(index + 1)}
@@ -696,7 +696,7 @@
 //                   {currentPage > 3 && <span className="px-2 py-1.5">...</span>}
 //                   {currentPage > 3 && currentPage < totalPages - 2 && (
 //                     <button
-//                       className="px-3 py-1.5 rounded-md text-sm bg-blue-800 text-white"
+//                       className="px-3 py-1.5 rounded-md text-sm bg-indigo-800 text-white"
 //                     >
 //                       {currentPage}
 //                     </button>
@@ -707,7 +707,7 @@
 //                       key={totalPages - 2 + index}
 //                       className={`px-3 py-1.5 rounded-md text-sm ${
 //                         currentPage === totalPages - 2 + index
-//                           ? "bg-blue-800 text-white"
+//                           ? "bg-indigo-800 text-white"
 //                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
 //                       } transition-colors`}
 //                       onClick={() => setCurrentPage(totalPages - 2 + index)}
@@ -720,7 +720,7 @@
 //               <button
 //                 disabled={currentPage === totalPages}
 //                 onClick={() => setCurrentPage((prev) => prev + 1)}
-//                 className="px-3 py-1.5 text-sm rounded-md bg-blue-800 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+//                 className="px-3 py-1.5 text-sm rounded-md bg-indigo-800 text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
 //               >
 //                 Next
 //               </button>
@@ -1097,15 +1097,8 @@ const Bikes = () => {
     <div className="bg-gray-100 min-h-screen">
       
       <div className="flex justify-between items-center mt-4 mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">All Bikes List</h1>
-        {!formVisible && (
-          <button
-            onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
-          >
-            + Add Bike
-          </button>
-        )}
+        {/* <h1 className="text-2xl font-bold text-gray-800">All Bikes</h1> */}
+        
       </div>
 
       {formVisible ? (
@@ -1367,7 +1360,7 @@ const Bikes = () => {
             <div className="mt-4 flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+                className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
               >
                 {editingId ? "Save" : "Add"}
               </button>
@@ -1383,18 +1376,27 @@ const Bikes = () => {
         </div>
       ) : (
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-6">
+          <h1 className="text-xl font-bold text-indigo-900">All Bikes</h1>
+          {!formVisible && (
+          <button
+            onClick={() => setFormVisible(true)}
+            className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
+          >
+            + Add Bike
+          </button>
+        )}
             <input
               type="text"
               placeholder="Search by Brand Name..."
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="relative overflow-x-auto shadow-md rounded-lg">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs uppercase bg-blue-900 text-white">
+              <thead className="text-xs uppercase bg-indigo-900 text-white">
                 <tr>
                   <th scope="col" className="px-6 py-3">No.</th>
                   <th scope="col" className="px-6 py-3">Brand Name</th>
@@ -1410,7 +1412,7 @@ const Bikes = () => {
                   <tr>
                     <td colSpan="7" className="text-center py-6">
                       <div className="flex justify-center items-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-900"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-900"></div>
                         <span className="ml-2">Loading...</span>
                       </div>
                     </td>
@@ -1423,7 +1425,7 @@ const Bikes = () => {
                   </tr>
                 ) : (
                   currentData.map((bike, index) => (
-                    <tr key={bike.id} className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <tr key={bike.id} className={`border-b hover:bg-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                       <td className="px-6 py-4 font-medium">{indexOfFirstItem + index + 1}</td>
                       <td className="px-6 py-4">{bike.brand}</td>
                       <td className="px-6 py-4">{bike.categoryName}</td>
@@ -1433,7 +1435,7 @@ const Bikes = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
-                            className="px-3 py-1.5 flex items-center text-white bg-blue-700 hover:bg-blue-800 rounded-md transition-colors shadow-sm"
+                            className="px-3 py-1.5 flex items-center text-white bg-indigo-700 hover:bg-indigo-800 rounded-md transition-colors shadow-sm"
                             onClick={() => handleEditBike(bike)}
                           >
                             <FaEdit className="mr-1.5" size={14} />
@@ -1459,7 +1461,7 @@ const Bikes = () => {
             </p>
             <div className="flex space-x-1">
               <button
-                className="px-3 py-1.5 text-sm text-white bg-blue-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm text-white bg-indigo-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
@@ -1471,7 +1473,7 @@ const Bikes = () => {
                     key={index}
                     className={`px-3 py-1.5 rounded-md text-sm ${
                       currentPage === index + 1
-                        ? "bg-blue-800 text-white"
+                        ? "bg-indigo-800 text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     } transition-colors`}
                     onClick={() => setCurrentPage(index + 1)}
@@ -1486,7 +1488,7 @@ const Bikes = () => {
                       key={index}
                       className={`px-3 py-1.5 rounded-md text-sm ${
                         currentPage === index + 1
-                          ? "bg-blue-800 text-white"
+                          ? "bg-indigo-800 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       } transition-colors`}
                       onClick={() => setCurrentPage(index + 1)}
@@ -1497,7 +1499,7 @@ const Bikes = () => {
                   {currentPage > 3 && <span className="px-2 py-1.5">...</span>}
                   {currentPage > 3 && currentPage < totalPages - 2 && (
                     <button
-                      className="px-3 py-1.5 rounded-md text-sm bg-blue-800 text-white"
+                      className="px-3 py-1.5 rounded-md text-sm bg-indigo-800 text-white"
                     >
                       {currentPage}
                     </button>
@@ -1508,7 +1510,7 @@ const Bikes = () => {
                       key={totalPages - 2 + index}
                       className={`px-3 py-1.5 rounded-md text-sm ${
                         currentPage === totalPages - 2 + index
-                          ? "bg-blue-800 text-white"
+                          ? "bg-indigo-800 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       } transition-colors`}
                       onClick={() => setCurrentPage(totalPages - 2 + index)}
@@ -1521,7 +1523,7 @@ const Bikes = () => {
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
-                className="px-3 py-1.5 text-sm rounded-md bg-blue-800 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm rounded-md bg-indigo-800 text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>

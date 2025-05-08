@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoLayersOutline, IoPricetagsOutline } from "react-icons/io5";
-import { LuBox, LuUsers2, LuChevronRight, LuMenu } from "react-icons/lu";
-import { RiMotorbikeLine } from "react-icons/ri";
+import { LuBox, LuUsers2, LuChevronRight, LuMenu, LuCalendarClock } from "react-icons/lu";
+import { RiMotorbikeLine, RiServiceLine } from "react-icons/ri";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { MdOutlineLocalGroceryStore } from "react-icons/md";
-import { TbBrandBooking, TbReportSearch } from "react-icons/tb";
+import { MdOutlineLocalGroceryStore, MdSell } from "react-icons/md";
+import { TbBrandBooking, TbReportSearch, TbTools } from "react-icons/tb";
+import { FaWrench, FaCogs } from "react-icons/fa";
 import Header from "./Header";
 
 const Sidebar = () => {
@@ -126,6 +127,16 @@ const Sidebar = () => {
     },
     { id: 6, path: "/dashboard/allOffers", name: "All Offers", icon: IoPricetagsOutline },
     { id: 9, path: "/dashboard/allRegisterCustomers", name: "All Registered Customers", icon: LuUsers2 },
+    { id: 11, path: "/dashboard/timeSlot", name: "Time Slot", icon: LuCalendarClock },
+    { id: 12, name: "Sell Bikes", icon: MdSell,
+      submenu: [
+        { id: 121, path: "/dashboard/sellBikes", name: "Sell Bikes" },
+        { id: 122, path: "/dashboard/bikeEnquiries", name: "Bike Enquiries" },
+      ],
+    },
+    { id: 13, path: "/dashboard/bikeServices", name: "Bike Services", icon: RiServiceLine },
+    { id: 14, path: "/dashboard/spareParts", name: "Spare Parts", icon: FaCogs },
+    { id: 15, path: "/dashboard/serviceOrders", name: "Service Orders", icon: FaWrench },
     // { id: 10, name: "All Reports", icon: TbReportSearch,
     //   submenu: [
     //     { id: 101, path: "/dashboard/allReport/bookingReport", name: "Booking Report" },
@@ -138,11 +149,11 @@ const Sidebar = () => {
   return (
     <>
       {/* Responsive Header Bar */}
-      <div className="fixed h-20 top-0 left-0 z-30 w-full bg-blue-900 flex justify-between items-center px-4 py-4">
+      <div className="fixed h-20 top-0 left-0 z-30 w-full bg-indigo-900 flex justify-between items-center px-4 py-4">
         <div className="flex items-center">
           <button
             onClick={windowWidth < 768 ? toggleMenu : toggleDesktopSidebar}
-            className="text-white p-2 rounded-md hover:bg-blue-800 transition-colors mr-2"
+            className="text-white p-2 rounded-md hover:bg-indigo-800 transition-colors mr-2"
             aria-label="Toggle menu"
           >
             <div className="w-6 flex flex-col items-end justify-center gap-1.5">
@@ -180,7 +191,7 @@ const Sidebar = () => {
       {/* Sidebar navigation */}
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 left-0 z-20 bg-blue-900 flex flex-col transition-all duration-300 ease-in-out
+        className={`fixed inset-y-0 left-0 z-20 bg-indigo-900 flex flex-col transition-all duration-300 ease-in-out
                     ${isMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     ${isDesktopCollapsed ? 'md:w-20' : 'md:w-72'}
                     pt-16
@@ -202,7 +213,7 @@ const Sidebar = () => {
                     >
                       <div className={`flex items-center ${isDesktopCollapsed && windowWidth >= 768 ? 'justify-center' : ''}`}>
                         <span className="text-xl">{link.icon && React.createElement(link.icon, { size: isDesktopCollapsed && windowWidth >= 768 ? 22 : 18 })}</span>
-                        <span className={`ml-3 text-sm font-medium whitespace-nowrap ${isDesktopCollapsed && windowWidth >= 768 ? 'hidden' : ''}`}>
+                        <span className={`ml-3 text-xs font-medium whitespace-nowrap ${isDesktopCollapsed && windowWidth >= 768 ? 'hidden' : ''}`}>
                           {link.name}
                         </span>
                       </div>
@@ -252,7 +263,7 @@ const Sidebar = () => {
                             <Link
                               key={subitem.id}
                               to={subitem.path}
-                              className="hidden group-hover:block absolute left-full top-0 ml-2 px-4 py-2 bg-blue-800 text-white rounded shadow-lg whitespace-nowrap"
+                              className="hidden group-hover:block absolute left-full top-0 ml-2 px-4 py-2 bg-indigo-800 text-white rounded shadow-lg whitespace-nowrap"
                               onClick={(e) => {
                                 e.preventDefault(); // Prevent default Link behavior
                                 handleLinkClick(index, subitem.path);

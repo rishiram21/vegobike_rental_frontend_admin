@@ -141,7 +141,7 @@ const PickUpTariffPlan = () => {
         {!formVisible && (
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded-r hover:bg-blue-600"
+            className="px-4 py-2 bg-indigo-900 text-white rounded-r hover:bg-indigo-600"
           >
             + Add Price
           </button>
@@ -246,7 +246,7 @@ const PickUpTariffPlan = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 mr-2 text-white bg-blue-900 rounded hover:bg-blue-600"
+                className="px-4 py-2 mr-2 text-white bg-indigo-900 rounded hover:bg-indigo-600"
               >
                 {editingId ? "Save" : "Add"}
               </button>
@@ -267,7 +267,7 @@ const PickUpTariffPlan = () => {
               <input
                 type="text"
                 placeholder="Search..."
-                className="border border-gray-300 rounded-l px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-l px-8 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -333,7 +333,7 @@ const PickUpTariffPlan = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-4">
                           <button
-                            className="px-4 py-2 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
+                            className="px-4 py-2 flex items-center text-white bg-indigo-800 hover:bg-indigo-600 rounded"
                             onClick={() =>
                               handleEditTariffPlan(pickuptariffplan)
                             }
@@ -367,7 +367,7 @@ const PickUpTariffPlan = () => {
             </p>
             <div className="flex space-x-2">
               <button
-                className="px-4 py-2 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
@@ -378,7 +378,7 @@ const PickUpTariffPlan = () => {
                   key={index}
                   className={`px-4 py-2 rounded ${
                     currentPage === index + 1
-                      ? "bg-blue-900 text-white"
+                      ? "bg-indigo-900 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                   onClick={() => setCurrentPage(index + 1)}
@@ -392,7 +392,7 @@ const PickUpTariffPlan = () => {
                 className={`px-4 py-2 rounded ${
                   currentPage === totalPages
                     ? "bg-gray-300 text-gray-500"
-                    : "bg-blue-900 text-white hover:bg-blue-600"
+                    : "bg-indigo-900 text-white hover:bg-indigo-600"
                 }`}
               >
                 Next

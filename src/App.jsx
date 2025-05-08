@@ -16,6 +16,9 @@ import BookingReport from "./pages/AllReport/BookingReport";
 import GstReport from "./pages/AllReport/GstReport";
 import SalesReport from "./pages/AllReport/SalesReport";
 import Login from "./pages/AdminLogin";
+import TimeSlot from "./pages/TimeSlot";
+import BikeServices from "./pages/BikeServices";
+import SpareParts from "./pages/SpareParts";
 
 function App() {
   return (
@@ -29,6 +32,10 @@ function App() {
           <Route path="storeMaster" element={<StoreMaster />}></Route>
           <Route path="allUsers" element={<AllUsers />}></Route>
           <Route path="allOffers" element={<AllOffers />}></Route>
+          <Route path="timeslot" element={<TimeSlot />}></Route>
+          <Route path="bikeServices" element={<BikeServices />}></Route>
+          <Route path="spareParts" element={<SpareParts />}></Route>
+          
 
           {/* Submenu Routes  */}
           <Route path="priceMaster/deliveryAtLocationPrices" element={<DeliveryAtLocationPrices />}></Route>
@@ -40,6 +47,7 @@ function App() {
           <Route path="allReport/bookingReport" element={<BookingReport />}></Route>
           <Route path="allReport/gstReport" element={<GstReport />}></Route>
           <Route path="allReport/salesReport" element={<SalesReport />}></Route>
+          
         </Route>
       </Routes>
     </BrowserRouter>

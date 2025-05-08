@@ -1,28 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import apiClient from "../api/apiConfig";
 
-const Allcoupons = () => {
+const TimeSlot = () => {
   const [data, setData] = useState([]);
-  const [statuses, setStatuses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [formVisible, setFormVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [formData, setFormData] = useState({
-    couponName: "",
-    couponCode: "",
-    couponType: "",
-    discountValue: "",
-    minimumRideAmount: "",
-    totalCoupon: "",
-    remainingCoupon: "",
+    name: "",
+    startTime: "",
+    endTime: "",
     isActive: true,
-    startDate: "",
-    endDate: "",
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [itemsPerPage] = useState(10);
 
   useEffect(() => {
@@ -31,101 +23,77 @@ const Allcoupons = () => {
       behavior: 'smooth'
     });
 
-    const fetchCoupons = async () => {
-      setLoading(true);
-      try {
-        const response = await apiClient.get("/coupons/all");
-        setData(response.data);
-        setStatuses(
-          response.data.map((item) => ({ id: item.couponId, status: item.isActive ? "Active" : "Inactive" }))
-        );
-      } catch (error) {
-        console.error("Error fetching coupon data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCoupons();
+    // Simulate fetching data
+    const staticData = [
+      { id: 1, name: "06:00 AM - 07:00 AM", startTime: "06:00 AM", endTime: "07:00 AM", isActive: true },
+      { id: 2, name: "07:00 AM - 08:00 AM", startTime: "07:00 AM", endTime: "08:00 AM", isActive: true },
+      { id: 3, name: "08:00 AM - 09:00 AM", startTime: "08:00 AM", endTime: "09:00 AM", isActive: true },
+      { id: 4, name: "09:00 AM - 10:00 AM", startTime: "09:00 AM", endTime: "10:00 AM", isActive: true },
+      { id: 5, name: "10:00 AM - 11:00 AM", startTime: "10:00 AM", endTime: "11:00 AM", isActive: true },
+      { id: 6, name: "11:00 AM - 12:00 PM", startTime: "11:00 AM", endTime: "12:00 PM", isActive: true },
+      { id: 7, name: "12:00 PM - 01:00 PM", startTime: "12:00 PM", endTime: "01:00 PM", isActive: true },
+      { id: 8, name: "01:00 PM - 02:00 PM", startTime: "01:00 PM", endTime: "02:00 PM", isActive: true },
+      { id: 9, name: "02:00 PM - 03:00 PM", startTime: "02:00 PM", endTime: "03:00 PM", isActive: true },
+      { id: 10, name: "03:00 PM - 04:00 PM", startTime: "03:00 PM", endTime: "04:00 PM", isActive: true },
+    ];
+
+    setLoading(true);
+    setTimeout(() => {
+      setData(staticData);
+      setLoading(false);
+    }, 1000);
   }, [currentPage]);
 
-  const handledAddcoupon = (e) => {
+  const handleAddTimeSlot = (e) => {
     e.preventDefault();
-    const updatedFormData = {
+    const newTimeSlot = {
+      id: data.length + 1,
       ...formData,
-      couponType: formData.couponType || "FIXED_VALUE", // Default value
-      isActive: formData.isActive ?? true, // Ensure isActive is not null
     };
-    apiClient
-      .post("/coupons/add", updatedFormData)
-      .then((response) => {
-        setData([...data, response.data]);
-        resetForm();
-        window.location.reload();
-      })
-      .catch((error) => console.error("Error adding coupon data", error));
+    setData([...data, newTimeSlot]);
+    resetForm();
   };
 
-  const handleSaveEditCoupon = (e) => {
+  const handleSaveEditTimeSlot = (e) => {
     e.preventDefault();
-    apiClient
-      .put(`/coupons/updateId/${editingId}`, formData)
-      .then((response) => {
-        setData(
-          data.map((coupon) => (coupon.couponId === editingId ? response.data : coupon))
-        );
-        resetForm();
-        window.location.reload();
-      })
-      .catch((error) => console.error("Error saving data:", error));
+    setData(
+      data.map((timeSlot) => (timeSlot.id === editingId ? { ...formData, id: editingId } : timeSlot))
+    );
+    resetForm();
   };
 
-  const handleEditCoupon = (coupon) => {
-    setEditingId(coupon.couponId);
+  const handleEditTimeSlot = (timeSlot) => {
+    setEditingId(timeSlot.id);
     setFormData({
-      couponName: coupon.couponName,
-      couponCode: coupon.couponCode,
-      couponType: coupon.couponType,
-      discountValue: coupon.discountValue,
-      minimumRideAmount: coupon.minimumRideAmount,
-      totalCoupon: coupon.totalCoupon,
-      remainingCoupon: coupon.remainingCoupon,
-      isActive: coupon.isActive,
-      startDate: coupon.startDate,
-      endDate: coupon.endDate,
+      name: timeSlot.name,
+      startTime: timeSlot.startTime,
+      endTime: timeSlot.endTime,
+      isActive: timeSlot.isActive,
     });
     setFormVisible(true);
   };
 
-  const handleDeleteCoupon = (id) => {
-    apiClient
-      .delete(`/coupons/deleteId/${id}`)
-      .then(() => setData(data.filter((coupon) => coupon.couponId !== id)))
-      .catch((error) => console.error("Error deleting data:", error))
-      .finally(() => setConfirmDeleteId(null));
+  const handleDeleteTimeSlot = (id) => {
+    setData(data.filter((timeSlot) => timeSlot.id !== id));
+    setConfirmDeleteId(null);
   };
 
   const resetForm = () => {
     setEditingId(null);
     setFormData({
-      couponName: "",
-      couponCode: "",
-      couponType: "",
-      discountValue: "",
-      minimumRideAmount: "",
-      totalCoupon: "",
-      remainingCoupon: "",
+      name: "",
+      startTime: "",
+      endTime: "",
       isActive: true,
-      startDate: "",
-      endDate: "",
     });
     setFormVisible(false);
   };
 
   const filteredData = data.filter((item) => {
-    if (!item.couponName) {
+    if (!item.name) {
       return false;
     }
-    return item.couponName.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -133,181 +101,66 @@ const Allcoupons = () => {
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  // Calculate the starting serial number for the current page
   const startingSerialNumber = indexOfFirstItem + 1;
 
   const toggleStatus = (id, currentStatus) => {
     const newStatus = !currentStatus;
-    apiClient
-      .put(`/coupons/update-status/${id}`, null, { params: { isActive: newStatus } })
-      .then(() => {
-        setStatuses((prevStatuses) =>
-          prevStatuses.map((row) =>
-            row.id === id ? { ...row, status: newStatus ? "Active" : "Inactive" } : row
-          )
-        );
-        window.location.reload();
-      })
-      .catch((error) => console.error("Error updating status:", error));
+    setData((prevData) =>
+      prevData.map((row) =>
+        row.id === id ? { ...row, isActive: newStatus } : row
+      )
+    );
   };
 
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mt-4 mb-4">
-        {/* <h1 className="text-xl font-bold text-gray-800 md:text-2xl">All Coupon List</h1> */}
-        
+        {/* Title or other elements can be added here */}
       </div>
 
       {formVisible ? (
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h2 className="text-lg font-bold mb-4 md:text-xl">
-            {editingId ? "Edit Coupon" : "Add New Coupon"}
+            {editingId ? "Edit Time Slot" : "Add New Time Slot"}
           </h2>
-          <form onSubmit={editingId ? handleSaveEditCoupon : handledAddcoupon}>
+          <form onSubmit={editingId ? handleSaveEditTimeSlot : handleAddTimeSlot}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="col-span-1">
-                <label className="block mb-2 font-medium">Coupon Name *</label>
+                <label className="block mb-2 font-medium">Name *</label>
                 <input
                   type="text"
-                  name="couponName"
-                  placeholder="Enter coupon name"
+                  name="name"
+                  placeholder="Enter time slot name"
                   className="border p-2 rounded w-full"
-                  value={formData.couponName}
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, couponName: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
                   required
                 />
               </div>
               <div className="col-span-1">
-                <label className="block mb-2 font-medium">Coupon Code *</label>
+                <label className="block mb-2 font-medium">Start Time *</label>
                 <input
-                  type="text"
-                  name="couponCode"
+                  type="time"
+                  name="startTime"
                   className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.couponCode}
+                  value={formData.startTime}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      couponCode: e.target.value,
-                    })
+                    setFormData({ ...formData, startTime: e.target.value })
                   }
                   required
                 />
               </div>
               <div className="col-span-1">
-                <label className="block mb-2 font-medium">Discount Type *</label>
-                <select
-                  name="couponType"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.couponType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, couponType: e.target.value })
-                  }
-                  required
-                >
-                  <option value="FIXED_VALUE">Fixed Amount</option>
-                  <option value="PERCENTAGE">Percentage</option>
-                </select>
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">Discount Value *</label>
+                <label className="block mb-2 font-medium">End Time *</label>
                 <input
-                  type="text"
-                  name="discountValue"
+                  type="time"
+                  name="endTime"
                   className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.discountValue}
+                  value={formData.endTime}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      discountValue: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">
-                  Minimum Ride Amount *
-                </label>
-                <input
-                  type="text"
-                  name="minimumRideAmount"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.minimumRideAmount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      minimumRideAmount: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">
-                  Total Coupons *
-                </label>
-                <input
-                  type="text"
-                  name="totalCoupon"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.totalCoupon}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      totalCoupon: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">
-                  Remaining Coupons <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="remainingCoupon"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.remainingCoupon}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      remainingCoupon: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">Start Date *</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.startDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      startDate: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">End Date *</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.endDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      endDate: e.target.value,
-                    })
+                    setFormData({ ...formData, endTime: e.target.value })
                   }
                   required
                 />
@@ -348,18 +201,18 @@ const Allcoupons = () => {
       ) : (
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-indigo-900">All Coupons</h3>
-          {!formVisible && (
-          <button
-            onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
-          >
-            + Add Coupon
-          </button>
-        )}
+            <h3 className="text-xl font-bold text-indigo-900">All Time Slots</h3>
+            {!formVisible && (
+              <button
+                onClick={() => setFormVisible(true)}
+                className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
+              >
+                + Add Time Slot
+              </button>
+            )}
             <input
               type="text"
-              placeholder="Search By Coupon Name..."
+              placeholder="Search By Time Slot Name..."
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -370,13 +223,9 @@ const Allcoupons = () => {
               <thead className="text-xs uppercase bg-indigo-900 text-white">
                 <tr>
                   <th scope="col" className="px-6 py-3">No.</th>
-                  <th scope="col" className="px-6 py-3">Coupon Name</th>
-                  <th scope="col" className="px-6 py-3">Coupon Code</th>
-                  <th scope="col" className="px-6 py-3">Discount</th>
-                  <th scope="col" className="px-6 py-3">Total Coupons</th>
-                  <th scope="col" className="px-6 py-3">Remaining Coupons</th>
-                  <th scope="col" className="px-6 py-3">Start Date</th>
-                  <th scope="col" className="px-6 py-3">End Date</th>
+                  <th scope="col" className="px-6 py-3">Name</th>
+                  <th scope="col" className="px-6 py-3">Start Time</th>
+                  <th scope="col" className="px-6 py-3">End Time</th>
                   <th scope="col" className="px-6 py-3">Status</th>
                   <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
@@ -384,7 +233,7 @@ const Allcoupons = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="10" className="text-center py-6">
+                    <td colSpan="6" className="text-center py-6">
                       <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-900"></div>
                         <span className="ml-2">Loading...</span>
@@ -393,43 +242,46 @@ const Allcoupons = () => {
                   </tr>
                 ) : currentData.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="text-center py-4">
+                    <td colSpan="6" className="text-center py-4">
                       No data found
                     </td>
                   </tr>
                 ) : (
-                  currentData.map((coupon, index) => (
+                  currentData.map((timeSlot, index) => (
                     <tr
-                      key={coupon.couponId}
+                      key={timeSlot.id}
                       className={`border-b hover:bg-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                     >
                       <td className="px-6 py-4 font-medium">{startingSerialNumber + index}</td>
-                      <td className="px-6 py-4">{coupon.couponName}</td>
-                      <td className="px-6 py-4">{coupon.couponCode}</td>
-                      <td className="px-6 py-4">{coupon.discountValue}</td>
-                      <td className="px-6 py-4">{coupon.totalCoupon}</td>
-                      <td className="px-6 py-4">{coupon.remainingCoupon}</td>
-                      <td className="px-6 py-4">{coupon.startDate}</td>
-                      <td className="px-6 py-4">{coupon.endDate}</td>
+                      <td className="px-6 py-4">{timeSlot.name}</td>
+                      <td className="px-6 py-4">{timeSlot.startTime}</td>
+                      <td className="px-6 py-4">{timeSlot.endTime}</td>
                       <td className="px-6 py-4">
                         <button
                           className={`px-2 py-1 rounded ${
-                            coupon.isActive ? "bg-green-600 hover:bg-green-600 text-white" : "bg-red-700 hover:bg-red-600 text-white"
+                            timeSlot.isActive ? "bg-green-600 hover:bg-green-600 text-white" : "bg-red-700 hover:bg-red-600 text-white"
                           }`}
-                          onClick={() => toggleStatus(coupon.couponId, coupon.isActive)}
+                          onClick={() => toggleStatus(timeSlot.id, timeSlot.isActive)}
                         >
-                          {coupon.isActive ? "Active" : "Inactive"}
+                          {timeSlot.isActive ? "Active" : "Inactive"}
                         </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
                             className="px-3 py-1.5 flex items-center text-white bg-indigo-800 hover:bg-indigo-600 rounded"
-                            onClick={() => handleEditCoupon(coupon)}
+                            onClick={() => handleEditTimeSlot(timeSlot)}
                           >
                             <FaEdit className="mr-1.5" size={14} />
                             Edit
                           </button>
+                          {/* <button
+                            className="px-3 py-1.5 flex items-center text-white bg-red-600 hover:bg-red-500 rounded"
+                            onClick={() => setConfirmDeleteId(timeSlot.id)}
+                          >
+                            <FaTrash className="mr-1.5" size={14} />
+                            Delete
+                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -443,12 +295,12 @@ const Allcoupons = () => {
               <div className="bg-white p-6 rounded shadow-lg">
                 <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
                 <p className="mb-4">
-                  Are you sure you want to delete this coupon?
+                  Are you sure you want to delete this time slot?
                 </p>
                 <div className="flex justify-end space-x-4">
                   <button
                     className="bg-red-500 text-white px-4 py-2 rounded shadow-md hover:bg-red-700"
-                    onClick={() => handleDeleteCoupon(confirmDeleteId)}
+                    onClick={() => handleDeleteTimeSlot(confirmDeleteId)}
                   >
                     Yes, Delete
                   </button>
@@ -542,4 +394,4 @@ const Allcoupons = () => {
   );
 };
 
-export default Allcoupons;
+export default TimeSlot;

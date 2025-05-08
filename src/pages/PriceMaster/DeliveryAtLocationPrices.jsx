@@ -90,7 +90,7 @@ const DeliveryAtLocationPrices = () => {
         {!formVisible && (
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
           >
             + Add Price
           </button>
@@ -136,7 +136,7 @@ const DeliveryAtLocationPrices = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 mr-2 text-white bg-blue-900 rounded hover:bg-blue-600"
+                className="px-4 py-2 mr-2 text-white bg-indigo-900 rounded hover:bg-indigo-600"
               >
                 {editingId ? "Save" : "Add"}
               </button>
@@ -192,7 +192,7 @@ const DeliveryAtLocationPrices = () => {
                       <td className="px-6 py-4">{deliveryprice.price}</td>
                       <td className="px-6 py-4">
                         <button
-                          className="px-4 py-2 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded mr-2"
+                          className="px-4 py-2 flex items-center text-white bg-indigo-800 hover:bg-indigo-600 rounded mr-2"
                           onClick={() => handleEditDeliveryPrice(deliveryprice)}
                         >
                           <FaEdit className="mr-2" /> Edit
@@ -213,7 +213,7 @@ const DeliveryAtLocationPrices = () => {
             </p>
             <div className="flex space-x-2">
               <button
-                className="px-4 py-2 text-sm text-white bg-blue-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm text-white bg-indigo-900 rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
@@ -224,7 +224,7 @@ const DeliveryAtLocationPrices = () => {
                   key={index}
                   className={`px-4 py-2 rounded ${
                     currentPage === index + 1
-                      ? "bg-blue-900 text-white"
+                      ? "bg-indigo-900 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                   onClick={() => setCurrentPage(index + 1)}
@@ -238,7 +238,7 @@ const DeliveryAtLocationPrices = () => {
                 className={`px-4 py-2 rounded ${
                   currentPage === totalPages
                     ? "bg-gray-300 text-gray-500"
-                    : "bg-blue-900 text-white hover:bg-blue-600"
+                    : "bg-indigo-900 text-white hover:bg-indigo-600"
                 }`}
               >
                 Next

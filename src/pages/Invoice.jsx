@@ -37,10 +37,10 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
   return (
     <div className="bg-white rounded-lg shadow-xl border border-gray-200 max-w-3xl mx-auto print:shadow-none">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-8 rounded-t-lg flex justify-between items-center">
+      <div className="bg-gradient-to-r from-indigo-900 to-indigo-800 text-white p-8 rounded-t-lg flex justify-between items-center">
         <div className="flex items-center space-x-4">
           {/* <div className="bg-white rounded-full p-2 shadow-lg">
-            <svg className="w-10 h-10 text-blue-800" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-10 h-10 text-indigo-800" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="25" cy="25" r="24" stroke="currentColor" strokeWidth="2" />
               <path d="M15 30C18.866 30 22 26.866 22 23C22 19.134 18.866 16 15 16C11.134 16 8 19.134 8 23C8 26.866 11.134 30 15 30Z" fill="currentColor" />
               <path d="M35 30C38.866 30 42 26.866 42 23C42 19.134 38.866 16 35 16C31.134 16 28 19.134 28 23C28 26.866 31.134 30 35 30Z" fill="currentColor" />
@@ -49,19 +49,19 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
           </div> */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight">OkBikes</h1>
-            <p className="text-blue-100">Ride with confidence</p>
+            <p className="text-indigo-100">Ride with confidence</p>
           </div>
         </div>
         <div className="text-right">
           <h2 className="text-2xl font-bold tracking-wide uppercase">Invoice</h2>
-          <div className="bg-blue-700 px-3 py-1 rounded mt-1 inline-block">
-            <p className="text-blue-100">OKB-{booking.bookingId}</p>
+          <div className="bg-indigo-700 px-3 py-1 rounded mt-1 inline-block">
+            <p className="text-indigo-100">OKB-{booking.bookingId}</p>
           </div>
         </div>
       </div>
 
       {/* Status Bar */}
-      <div className="bg-blue-50 px-8 py-3 border-b border-blue-100 flex justify-between items-center">
+      <div className="bg-indigo-50 px-8 py-3 border-b border-indigo-100 flex justify-between items-center">
         {/* <div className="flex items-center">
           <div className={`w-3 h-3 rounded-full mr-2 ${booking.paymentStatus === 'Paid' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
           <span className="font-medium text-gray-700">Status: {booking.paymentStatus || "Pending"}</span>
@@ -76,13 +76,13 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
       <div className="p-8">
         {/* Address and Date Section */}
         <div className="flex justify-between mb-8">
-          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-800 w-5/12">
+          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-800 w-5/12">
             <h3 className="font-bold text-gray-700 mb-2 text-sm uppercase tracking-wider">Billed To:</h3>
             <p className="text-gray-800 font-medium text-lg">{booking.userName}</p>
             {/* <p className="text-gray-600 mt-1">{booking.userEmail || "email@example.com"}</p> */}
             <p className="text-gray-600">{booking.userPhone || "+91 XXXXX-XXXXX"}</p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-800 w-5/12">
+          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-800 w-5/12">
             <h3 className="font-bold text-gray-700 mb-2 text-sm uppercase tracking-wider">Payment Details:</h3>
             <p className="text-gray-600">Payment Mode: <span className="font-medium">{booking.paymentMode || "Cash On Center"}</span></p>
             <p className="text-gray-600">Security Deposit: <span className="font-medium">₹{booking.vehiclePackage.deposit}</span></p>
@@ -92,7 +92,7 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
 
         {/* Booking Details */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-blue-900 pb-2 mb-4 flex items-center">
+          <h3 className="text-xl font-semibold text-indigo-900 pb-2 mb-4 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
@@ -144,7 +144,7 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
 
         {/* Charges Breakdown */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-blue-900 pb-2 mb-4 flex items-center">
+          <h3 className="text-xl font-semibold text-indigo-900 pb-2 mb-4 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
@@ -196,10 +196,10 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="bg-blue-50">
-                <tr className="border-t-2 border-blue-200">
-                  <td className="py-4 px-4 text-lg font-bold text-blue-900">Total Amount</td>
-                  <td className="py-4 px-4 text-2xl font-bold text-blue-900 text-right">₹{totalAmount.toFixed(2)}</td>
+              <tfoot className="bg-indigo-50">
+                <tr className="border-t-2 border-indigo-200">
+                  <td className="py-4 px-4 text-lg font-bold text-indigo-900">Total Amount</td>
+                  <td className="py-4 px-4 text-2xl font-bold text-indigo-900 text-right">₹{totalAmount.toFixed(2)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -260,7 +260,7 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
       <div className="bg-gray-50 px-8 py-4 rounded-b-lg border-t border-gray-200 print:hidden">
         <div className="flex justify-end">
           <button
-            className="px-6 py-2.5 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center shadow-md"
+            className="px-6 py-2.5 bg-indigo-800 text-white rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center shadow-md"
             onClick={() => window.print()}
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
