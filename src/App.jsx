@@ -19,6 +19,7 @@ import Login from "./pages/AdminLogin";
 import TimeSlot from "./pages/TimeSlot";
 import BikeServices from "./pages/BikeServices";
 import SpareParts from "./pages/SpareParts";
+import ServiceOrders from "./components/ServiceOrders";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="timeslot" element={<TimeSlot />}></Route>
           <Route path="bikeServices" element={<BikeServices />}></Route>
           <Route path="spareParts" element={<SpareParts />}></Route>
+          <Route path="serviceOrders" element={<ServiceOrders />}></Route>
           
 
           {/* Submenu Routes  */}

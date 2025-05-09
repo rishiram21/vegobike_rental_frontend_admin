@@ -114,6 +114,53 @@ const AllBookings = () => {
     }
   }, [itemsPerPage]);
 
+  const reloadBookings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get("/booking/all");
+      const sortedData = response.data.sort((a, b) => b.bookingId - a.bookingId);
+
+      const combinedBookings = await Promise.all(
+        sortedData.map(async (booking) => {
+          const combinedResponse = await apiClient.get(`/booking/combined/${booking.bookingId}`);
+          return {
+            ...booking,
+            vehicle: combinedResponse.data.vehicle,
+            store: combinedResponse.data.store,
+            vehicleImageUrl: combinedResponse.data.vehicle.image,
+            vehiclePackage: combinedResponse.data.vehiclePackage,
+            damage: combinedResponse.data.booking.damage,
+            challan: combinedResponse.data.booking.challan,
+            additionalCharges: combinedResponse.data.booking.additionalCharges,
+            challans: combinedResponse.data.booking.challans || [],
+            damages: combinedResponse.data.booking.damages || [],
+            vehicleNumber: combinedResponse.data.vehicle.vehicleRegistrationNumber,
+          };
+        })
+      );
+
+      const bookingWithUsernames = await Promise.all(
+        combinedBookings.map(async (booking) => {
+          const userResponse = await apiClient.get(`/users/${booking.userId}`);
+          return {
+            ...booking,
+            userName: userResponse.data.name,
+            userEmail: userResponse.data.email,
+            userPhone: userResponse.data.phoneNumber,
+          };
+        })
+      );
+
+      setData(bookingWithUsernames);
+      setTotalPages(Math.ceil(bookingWithUsernames.length / itemsPerPage));
+      setStatuses(bookingWithUsernames.map((item) => ({ id: item.bookingId, status: "Active" })));
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [itemsPerPage]);
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -223,6 +270,7 @@ const AllBookings = () => {
         setStatusMessage("Failed to update booking status.");
       }
     }
+    await reloadBookings(); // Reload the bookings after updating
   };
 
   const handleDocumentAction = async (docType, action) => {
@@ -308,6 +356,7 @@ const AllBookings = () => {
       toast.error("Failed to update booking.");
       setStatusMessage("Failed to update booking.");
     }
+    await reloadBookings(); // Reload the bookings after saving
   };
 
   const calculateDuration = useCallback(() => {
@@ -380,6 +429,7 @@ const AllBookings = () => {
           handleView={handleView}
           indexOfFirstItem={indexOfFirstItem} // Pass indexOfFirstItem as a prop
           indexOfLastItem={indexOfLastItem} // Pass indexOfLastItem as a prop
+          reloadBookings={reloadBookings} // Pass reloadBookings as a prop
         />
       )}
     </div>
@@ -470,10 +520,10 @@ const BookingDetails = ({
                   ₹{(selectedBooking.vehiclePackage.price * 0.18).toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between mb-2">
+              {/* <div className="flex justify-between mb-2">
                 <span className="text-gray-600">Convenience Fee:</span>
                 <span className="font-medium">₹2.00</span>
-              </div>
+              </div> */}
               <div className="flex justify-between mb-2">
                 <span className="text-gray-600">Late Charges:</span>
                 <span className="font-medium">₹{calculateLateCharges()}</span>
@@ -612,16 +662,15 @@ const BookingDetails = ({
                 </div>
 
                 <div className="w-1/4">
-                <input
-  type="tel"
-  min="0"
-  value={charge.amount}
-  onChange={(e) => handleChangeAmount(index, e.target.value)}
-  placeholder="Amount"
-  className="block w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
-  disabled={!chargesEditable}
-/>
-
+                  <input
+                    type="tel"
+                    min="0"
+                    value={charge.amount}
+                    onChange={(e) => handleChangeAmount(index, e.target.value)}
+                    placeholder="Amount"
+                    className="block w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    disabled={!chargesEditable}
+                  />
                 </div>
 
                 {charges.length > 1 && chargesEditable && (
@@ -767,7 +816,8 @@ const AllBookingsList = ({
   filteredData,
   handleView,
   indexOfFirstItem, // Receive indexOfFirstItem as a prop
-  indexOfLastItem // Receive indexOfLastItem as a prop
+  indexOfLastItem, // Receive indexOfLastItem as a prop
+  reloadBookings // Receive reloadBookings as a prop
 }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -863,7 +913,10 @@ const AllBookingsList = ({
           <button
             className="px-3 py-1.5 text-sm text-white bg-indigo-800 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
+            onClick={async () => {
+              setCurrentPage((prev) => prev - 1);
+              await reloadBookings(); // Reload the bookings after changing the page
+            }}
           >
             Previous
           </button>
@@ -876,7 +929,10 @@ const AllBookingsList = ({
                     ? "bg-indigo-800 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 } transition-colors`}
-                onClick={() => setCurrentPage(index + 1)}
+                onClick={async () => {
+                  setCurrentPage(index + 1);
+                  await reloadBookings(); // Reload the bookings after changing the page
+                }}
               >
                 {index + 1}
               </button>
@@ -891,7 +947,10 @@ const AllBookingsList = ({
                       ? "bg-indigo-800 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   } transition-colors`}
-                  onClick={() => setCurrentPage(index + 1)}
+                  onClick={async () => {
+                    setCurrentPage(index + 1);
+                    await reloadBookings(); // Reload the bookings after changing the page
+                  }}
                 >
                   {index + 1}
                 </button>
@@ -900,6 +959,9 @@ const AllBookingsList = ({
               {currentPage > 3 && currentPage < totalPages - 2 && (
                 <button
                   className="px-3 py-1.5 rounded-md text-sm bg-indigo-800 text-white"
+                  onClick={async () => {
+                    await reloadBookings(); // Reload the bookings after changing the page
+                  }}
                 >
                   {currentPage}
                 </button>
@@ -913,7 +975,10 @@ const AllBookingsList = ({
                       ? "bg-indigo-800 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   } transition-colors`}
-                  onClick={() => setCurrentPage(totalPages - 2 + index)}
+                  onClick={async () => {
+                    setCurrentPage(totalPages - 2 + index);
+                    await reloadBookings(); // Reload the bookings after changing the page
+                  }}
                 >
                   {totalPages - 2 + index}
                 </button>
@@ -922,7 +987,10 @@ const AllBookingsList = ({
           )}
           <button
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
+            onClick={async () => {
+              setCurrentPage((prev) => prev + 1);
+              await reloadBookings(); // Reload the bookings after changing the page
+            }}
             className="px-3 py-1.5 text-sm rounded-md bg-indigo-800 text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
           >
             Next

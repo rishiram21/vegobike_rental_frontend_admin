@@ -1,102 +1,135 @@
 import React, { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
-// Define the static spare parts data
-const staticSpareParts = [
+// Define the static service orders data
+const staticServiceOrders = [
   {
     id: 1,
-    partImage: "/spare.jpg",
-    partName: "Service 1",
-    spareType: "Common",
-    price: 200,
+    orderId: "ORD001",
+    customer: "Customer 1",
+    orderAmount: 200,
+    orderStatus: "Completed",
+    paymentMethod: "Credit Card",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-01",
     isActive: true,
   },
   {
     id: 2,
-    partImage: "/spare.jpg",
-    partName: "Battery",
-    spareType: "Common",
-    price: 1200,
+    orderId: "ORD002",
+    customer: "Customer 2",
+    orderAmount: 1200,
+    orderStatus: "Pending",
+    paymentMethod: "PayPal",
+    paymentStatus: "Unpaid",
+    orderDate: "2023-10-02",
     isActive: true,
   },
   {
     id: 3,
-    partImage: "/spare.jpg",
-    partName: "Marine Engine oil",
-    spareType: "Common",
-    price: 750,
+    orderId: "ORD003",
+    customer: "Customer 3",
+    orderAmount: 750,
+    orderStatus: "Completed",
+    paymentMethod: "Credit Card",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-03",
     isActive: true,
   },
   {
     id: 4,
-    partImage: "/spare.jpg",
-    partName: "Brake Pads",
-    spareType: "Common",
-    price: 1500,
+    orderId: "ORD004",
+    customer: "Customer 4",
+    orderAmount: 1500,
+    orderStatus: "Pending",
+    paymentMethod: "Bank Transfer",
+    paymentStatus: "Unpaid",
+    orderDate: "2023-10-04",
     isActive: true,
   },
   {
     id: 5,
-    partImage: "/spare.jpg",
-    partName: "Air Filter",
-    spareType: "Common",
-    price: 1500,
+    orderId: "ORD005",
+    customer: "Customer 5",
+    orderAmount: 1500,
+    orderStatus: "Completed",
+    paymentMethod: "Credit Card",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-05",
+    isActive: true,
+  },
+  {
+    id: 6,
+    orderId: "ORD006",
+    customer: "Customer 6",
+    orderAmount: 200,
+    orderStatus: "Completed",
+    paymentMethod: "PayPal",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-06",
+    isActive: true,
+  },
+  {
+    id: 7,
+    orderId: "ORD007",
+    customer: "Customer 7",
+    orderAmount: 700,
+    orderStatus: "Completed",
+    paymentMethod: "Credit Card",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-07",
     isActive: true,
   },
   {
     id: 8,
-    partImage: "/spare.jpg",
-    partName: "Air Filter",
-    spareType: "Common",
-    price: 200,
+    orderId: "ORD008",
+    customer: "Customer 8",
+    orderAmount: 800,
+    orderStatus: "Pending",
+    paymentMethod: "Bank Transfer",
+    paymentStatus: "Unpaid",
+    orderDate: "2023-10-08",
     isActive: true,
   },
   {
     id: 9,
-    partImage: "/spare.jpg",
-    partName: "Clutch cable",
-    spareType: "Common",
-    price: 700,
+    orderId: "ORD009",
+    customer: "Customer 9",
+    orderAmount: 250,
+    orderStatus: "Completed",
+    paymentMethod: "Credit Card",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-09",
     isActive: true,
   },
   {
     id: 10,
-    partImage: "/spare.jpg",
-    partName: "Meter assembly",
-    spareType: "Common",
-    price: 800,
-    isActive: true,
-  },
-  {
-    id: 11,
-    partImage: "/spare.jpg",
-    partName: "Clutch lever",
-    spareType: "Common",
-    price: 250,
-    isActive: true,
-  },
-  {
-    id: 12,
-    partImage: "/spare.jpg",
-    partName: "Test",
-    spareType: "Specific",
-    price: 4000,
+    orderId: "ORD010",
+    customer: "Customer 10",
+    orderAmount: 4000,
+    orderStatus: "Completed",
+    paymentMethod: "PayPal",
+    paymentStatus: "Paid",
+    orderDate: "2023-10-10",
     isActive: true,
   },
 ];
 
-const SpareParts = () => {
-  const [spareParts, setSpareParts] = useState(staticSpareParts);
+const ServiceOrders = () => {
+  const [orders, setOrders] = useState(staticServiceOrders);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [formVisible, setFormVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [formData, setFormData] = useState({
-    partImage: "",
-    partName: "",
-    spareType: "",
-    price: "",
+    orderId: "",
+    customer: "",
+    orderAmount: "",
+    orderStatus: "",
+    paymentMethod: "",
+    paymentStatus: "",
+    orderDate: "",
     isActive: true,
   });
   const [itemsPerPage] = useState(10);
@@ -109,60 +142,66 @@ const SpareParts = () => {
     });
   };
 
-  const handleAddSparePart = (e) => {
+  const handleAddOrder = (e) => {
     e.preventDefault();
-    const newSparePart = {
-      id: spareParts.length + 1,
+    const newOrder = {
+      id: orders.length + 1,
       ...formData,
     };
-    setSpareParts([...spareParts, newSparePart]);
+    setOrders([...orders, newOrder]);
     resetForm();
   };
 
-  const handleUpdateSparePart = (e) => {
+  const handleUpdateOrder = (e) => {
     e.preventDefault();
-    setSpareParts(
-      spareParts.map((sparePart) =>
-        sparePart.id === editingId ? { ...formData, id: editingId } : sparePart
+    setOrders(
+      orders.map((order) =>
+        order.id === editingId ? { ...formData, id: editingId } : order
       )
     );
     resetForm();
   };
 
-  const handleEditSparePart = (sparePart) => {
-    setEditingId(sparePart.id);
+  const handleEditOrder = (order) => {
+    setEditingId(order.id);
     setFormData({
-      partImage: sparePart.partImage,
-      partName: sparePart.partName,
-      spareType: sparePart.spareType,
-      price: sparePart.price,
-      isActive: sparePart.isActive,
+      orderId: order.orderId,
+      customer: order.customer,
+      orderAmount: order.orderAmount,
+      orderStatus: order.orderStatus,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      orderDate: order.orderDate,
+      isActive: order.isActive,
     });
     setFormVisible(true);
   };
 
-  const handleDeleteSparePart = (id) => {
-    setSpareParts(spareParts.filter((sparePart) => sparePart.id !== id));
+  const handleDeleteOrder = (id) => {
+    setOrders(orders.filter((order) => order.id !== id));
     setConfirmDeleteId(null);
   };
 
   const resetForm = () => {
     setEditingId(null);
     setFormData({
-      partImage: "",
-      partName: "",
-      spareType: "",
-      price: "",
+      orderId: "",
+      customer: "",
+      orderAmount: "",
+      orderStatus: "",
+      paymentMethod: "",
+      paymentStatus: "",
+      orderDate: "",
       isActive: true,
     });
     setFormVisible(false);
   };
 
-  const filteredData = spareParts.filter((item) => {
-    if (!item.partName) {
+  const filteredData = orders.filter((item) => {
+    if (!item.customer) {
       return false;
     }
-    return item.partName.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.customer.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -174,7 +213,7 @@ const SpareParts = () => {
 
   const toggleStatus = (id, currentStatus) => {
     const newStatus = !currentStatus;
-    setSpareParts((prevData) =>
+    setOrders((prevData) =>
       prevData.map((row) =>
         row.id === id ? { ...row, isActive: newStatus } : row
       )
@@ -190,50 +229,92 @@ const SpareParts = () => {
       {formVisible ? (
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h2 className="text-lg font-bold mb-4 md:text-xl">
-            {editingId ? "Edit Spare Part" : "Add New Spare Part"}
+            {editingId ? "Edit Service Order" : "Add New Service Order"}
           </h2>
-          <form onSubmit={editingId ? handleUpdateSparePart : handleAddSparePart}>
+          <form onSubmit={editingId ? handleUpdateOrder : handleAddOrder}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="col-span-1">
-                <label className="block mb-2 font-medium">Part Image</label>
-                <input
-                  type="file"
-                  name="partImage"
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 p-2 rounded"
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="block mb-2 font-medium">Part Name *</label>
+                <label className="block mb-2 font-medium">Order ID *</label>
                 <input
                   type="text"
-                  name="partName"
-                  value={formData.partName}
+                  name="orderId"
+                  value={formData.orderId}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 p-2 rounded"
                   required
                 />
               </div>
               <div className="col-span-1">
-                <label className="block mb-2 font-medium">Spare Type *</label>
+                <label className="block mb-2 font-medium">Customer *</label>
+                <input
+                  type="text"
+                  name="customer"
+                  value={formData.customer}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                  required
+                />
+              </div>
+              <div className="col-span-1">
+                <label className="block mb-2 font-medium">Order Amount *</label>
+                <input
+                  type="number"
+                  name="orderAmount"
+                  value={formData.orderAmount}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                  required
+                />
+              </div>
+              <div className="col-span-1">
+                <label className="block mb-2 font-medium">Order Status *</label>
                 <select
-                  name="spareType"
-                  value={formData.spareType}
+                  name="orderStatus"
+                  value={formData.orderStatus}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 p-2 rounded"
                   required
                 >
-                  <option value="">Select Spare Type</option>
-                  <option value="Common">Common</option>
-                  <option value="Specific">Specific</option>
+                  <option value="">Select Order Status</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
                 </select>
               </div>
               <div className="col-span-1">
-                <label className="block mb-2 font-medium">Price *</label>
+                <label className="block mb-2 font-medium">Payment Method *</label>
+                <select
+                  name="paymentMethod"
+                  value={formData.paymentMethod}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                  required
+                >
+                  <option value="">Select Payment Method</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+              </div>
+              <div className="col-span-1">
+                <label className="block mb-2 font-medium">Payment Status *</label>
+                <select
+                  name="paymentStatus"
+                  value={formData.paymentStatus}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                  required
+                >
+                  <option value="">Select Payment Status</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Unpaid">Unpaid</option>
+                </select>
+              </div>
+              <div className="col-span-1">
+                <label className="block mb-2 font-medium">Order Date *</label>
                 <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
+                  type="date"
+                  name="orderDate"
+                  value={formData.orderDate}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 p-2 rounded"
                   required
@@ -275,18 +356,18 @@ const SpareParts = () => {
       ) : (
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-indigo-900">All Spare Parts</h3>
+            <h3 className="text-xl font-bold text-indigo-900">All Service Orders</h3>
             {!formVisible && (
               <button
                 onClick={() => setFormVisible(true)}
                 className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-600"
               >
-                + Add Spare Part
+                + Add Service Order
               </button>
             )}
             <input
               type="text"
-              placeholder="Search By Part Name..."
+              placeholder="Search By Customer..."
               className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -297,10 +378,13 @@ const SpareParts = () => {
               <thead className="text-xs uppercase bg-indigo-900 text-white">
                 <tr>
                   <th scope="col" className="px-6 py-3">No.</th>
-                  <th scope="col" className="px-6 py-3">Part Image</th>
-                  <th scope="col" className="px-6 py-3">Part Name</th>
-                  <th scope="col" className="px-6 py-3">Spare Type</th>
-                  <th scope="col" className="px-6 py-3">Price</th>
+                  <th scope="col" className="px-6 py-3">Order ID</th>
+                  <th scope="col" className="px-6 py-3">Customer</th>
+                  <th scope="col" className="px-6 py-3">Order Amount</th>
+                  <th scope="col" className="px-6 py-3">Order Status</th>
+                  <th scope="col" className="px-6 py-3">Payment Method</th>
+                  <th scope="col" className="px-6 py-3">Payment Status</th>
+                  <th scope="col" className="px-6 py-3">Order Date</th>
                   <th scope="col" className="px-6 py-3">Status</th>
                   <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
@@ -308,49 +392,46 @@ const SpareParts = () => {
               <tbody>
                 {currentData.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-4">
+                    <td colSpan="10" className="text-center py-4">
                       No data found
                     </td>
                   </tr>
                 ) : (
-                  currentData.map((sparePart, index) => (
+                  currentData.map((order, index) => (
                     <tr
-                      key={sparePart.id}
+                      key={order.id}
                       className={`border-b hover:bg-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                     >
                       <td className="px-6 py-4 font-medium">{startingSerialNumber + index}</td>
-                      <td className="px-6 py-4">
-                        <img
-                          src={sparePart.partImage}
-                          alt={sparePart.partName}
-                          className="w-12 h-12 object-cover"
-                        />
-                      </td>
-                      <td className="px-6 py-4">{sparePart.partName}</td>
-                      <td className="px-6 py-4">{sparePart.spareType}</td>
-                      <td className="px-6 py-4">{sparePart.price}</td>
+                      <td className="px-6 py-4">{order.orderId}</td>
+                      <td className="px-6 py-4">{order.customer}</td>
+                      <td className="px-6 py-4">{order.orderAmount}</td>
+                      <td className="px-6 py-4">{order.orderStatus}</td>
+                      <td className="px-6 py-4">{order.paymentMethod}</td>
+                      <td className="px-6 py-4">{order.paymentStatus}</td>
+                      <td className="px-6 py-4">{order.orderDate}</td>
                       <td className="px-6 py-4">
                         <button
                           className={`px-2 py-1 rounded ${
-                            sparePart.isActive ? "bg-green-600 hover:bg-green-600 text-white" : "bg-red-700 hover:bg-red-600 text-white"
+                            order.isActive ? "bg-green-600 hover:bg-green-600 text-white" : "bg-red-700 hover:bg-red-600 text-white"
                           }`}
-                          onClick={() => toggleStatus(sparePart.id, sparePart.isActive)}
+                          onClick={() => toggleStatus(order.id, order.isActive)}
                         >
-                          {sparePart.isActive ? "Active" : "Inactive"}
+                          {order.isActive ? "Active" : "Inactive"}
                         </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <button
                             className="px-3 py-1.5 flex items-center text-white bg-indigo-800 hover:bg-indigo-600 rounded"
-                            onClick={() => handleEditSparePart(sparePart)}
+                            onClick={() => handleEditOrder(order)}
                           >
                             <FaEdit className="mr-1.5" size={14} />
                             Edit
                           </button>
                           {/* <button
                             className="px-3 py-1.5 flex items-center text-white bg-red-600 hover:bg-red-500 rounded"
-                            onClick={() => setConfirmDeleteId(sparePart.id)}
+                            onClick={() => setConfirmDeleteId(order.id)}
                           >
                             <FaTrash className="mr-1.5" size={14} />
                             Delete
@@ -368,12 +449,12 @@ const SpareParts = () => {
               <div className="bg-white p-6 rounded shadow-lg">
                 <h3 className="text-lg font-bold mb-4">Confirm Delete</h3>
                 <p className="mb-4">
-                  Are you sure you want to delete this spare part?
+                  Are you sure you want to delete this service order?
                 </p>
                 <div className="flex justify-end space-x-4">
                   <button
                     className="bg-red-500 text-white px-4 py-2 rounded shadow-md hover:bg-red-700"
-                    onClick={() => handleDeleteSparePart(confirmDeleteId)}
+                    onClick={() => handleDeleteOrder(confirmDeleteId)}
                   >
                     Yes, Delete
                   </button>
@@ -467,4 +548,4 @@ const SpareParts = () => {
   );
 };
 
-export default SpareParts;
+export default ServiceOrders;

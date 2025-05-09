@@ -168,7 +168,8 @@ const Sidebar = () => {
               }`}></span>
             </div>
           </button>
-          <h1 className="text-white font-bold text-lg">
+          <img src="/vegologo.png" alt="VegoBike Logo" className="h-10 w-10" />
+          <h1 className="text-white font-bold text-3xl mt-2">
             VegoBike
           </h1>
         </div>
@@ -191,7 +192,7 @@ const Sidebar = () => {
       {/* Sidebar navigation */}
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 left-0 z-20 bg-indigo-900 flex flex-col transition-all duration-300 ease-in-out
+        className={`fixed inset-y-0 left-0 z-20 bg-indigo-950 flex flex-col transition-all duration-300 ease-in-out
                     ${isMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     ${isDesktopCollapsed ? 'md:w-20' : 'md:w-72'}
                     pt-16
@@ -205,7 +206,7 @@ const Sidebar = () => {
                   {!link.submenu ? (
                     <Link
                       to={link.path}
-                      className={`flex items-center py-3 px-3 rounded-lg hover:bg-indigo-700 ${activeLink === index ? 'bg-indigo-600 text-white' : 'text-indigo-100'}`}
+                      className={`flex items-center py-3 px-3 rounded-lg hover:bg-indigo-700 ${activeLink === index ? 'bg-indigo-900 text-white' : 'text-indigo-100'}`}
                       onClick={(e) => {
                         e.preventDefault(); // Prevent default Link behavior
                         handleLinkClick(index, link.path);

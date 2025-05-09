@@ -5,7 +5,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 const staticBikeServices = [
   {
     id: 1,
-    serviceImage: "path_to_image_1",
+    serviceImage: "/image.jpg",
     serviceName: "Test Service",
     category: "Bike v1",
     brandName: "HONDA",
@@ -16,7 +16,7 @@ const staticBikeServices = [
   },
   {
     id: 2,
-    serviceImage: "path_to_image_2",
+    serviceImage: "/image.jpg",
     serviceName: "Oil Change",
     category: "Bike v1",
     brandName: "HONDA",
@@ -27,7 +27,7 @@ const staticBikeServices = [
   },
   {
     id: 3,
-    serviceImage: "path_to_image_3",
+    serviceImage: "/image.jpg",
     serviceName: "Air Filter",
     category: "Bike v1",
     brandName: "HONDA",
@@ -38,7 +38,7 @@ const staticBikeServices = [
   },
   {
     id: 4,
-    serviceImage: "path_to_image_4",
+    serviceImage: "/image.jpg",
     serviceName: "Chain Lubrication and Adjustment",
     category: "Bike v1",
     brandName: "HERO",
@@ -49,7 +49,7 @@ const staticBikeServices = [
   },
   {
     id: 5,
-    serviceImage: "path_to_image_5",
+    serviceImage: "/image.jpg",
     serviceName: "Test Service",
     category: "Bike v1",
     brandName: "HONDA",
@@ -60,7 +60,7 @@ const staticBikeServices = [
   },
   {
     id: 6,
-    serviceImage: "path_to_image_6",
+    serviceImage: "/image.jpg",
     serviceName: "Tolling",
     category: "Bike v1",
     brandName: "HONDA",
@@ -71,7 +71,7 @@ const staticBikeServices = [
   },
   {
     id: 7,
-    serviceImage: "path_to_image_7",
+    serviceImage: "/image.jpg",
     serviceName: "Air Filter",
     category: "Scooter",
     brandName: "TVS",
@@ -82,7 +82,7 @@ const staticBikeServices = [
   },
   {
     id: 8,
-    serviceImage: "path_to_image_8",
+    serviceImage: "/image.jpg",
     serviceName: "Servicing",
     category: "Scooter",
     brandName: "TVS",
@@ -93,7 +93,7 @@ const staticBikeServices = [
   },
   {
     id: 9,
-    serviceImage: "path_to_image_9",
+    serviceImage: "/image.jpg",
     serviceName: "Test Service",
     category: "Sports Bike",
     brandName: "HERO",
