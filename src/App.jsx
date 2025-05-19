@@ -20,6 +20,7 @@ import TimeSlot from "./pages/TimeSlot";
 import BikeServices from "./pages/BikeServices";
 import SpareParts from "./pages/SpareParts";
 import ServiceOrders from "./components/ServiceOrders";
+import TrackVehicle from "./pages/TrackVehicle";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="bikeServices" element={<BikeServices />}></Route>
           <Route path="spareParts" element={<SpareParts />}></Route>
           <Route path="serviceOrders" element={<ServiceOrders />}></Route>
+          <Route path="trackvehicle" element={<TrackVehicle />}></Route>
           
 
           {/* Submenu Routes  */}

@@ -7,6 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { Plus, Trash2 } from 'lucide-react';
 import ImageDetail from './ImageDetail';
 import Invoice from './Invoice';
+import { FaMapMarkerAlt } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 
 const AllBookings = () => {
   const BookingStatus = {
@@ -270,7 +272,7 @@ const AllBookings = () => {
         setStatusMessage("Failed to update booking status.");
       }
     }
-    await reloadBookings(); // Reload the bookings after updating
+    await reloadBookings();
   };
 
   const handleDocumentAction = async (docType, action) => {
@@ -356,7 +358,7 @@ const AllBookings = () => {
       toast.error("Failed to update booking.");
       setStatusMessage("Failed to update booking.");
     }
-    await reloadBookings(); // Reload the bookings after saving
+    await reloadBookings();
   };
 
   const calculateDuration = useCallback(() => {
@@ -413,7 +415,7 @@ const AllBookings = () => {
           calculateLateCharges={calculateLateCharges}
           statusMessage={statusMessage}
           chargeTypes={chargeTypes}
-          BookingStatus={BookingStatus} // Pass BookingStatus as a prop
+          BookingStatus={BookingStatus}
         />
       ) : (
         <AllBookingsList
@@ -427,9 +429,9 @@ const AllBookings = () => {
           totalPages={totalPages}
           filteredData={filteredData}
           handleView={handleView}
-          indexOfFirstItem={indexOfFirstItem} // Pass indexOfFirstItem as a prop
-          indexOfLastItem={indexOfLastItem} // Pass indexOfLastItem as a prop
-          reloadBookings={reloadBookings} // Pass reloadBookings as a prop
+          indexOfFirstItem={indexOfFirstItem}
+          indexOfLastItem={indexOfLastItem}
+          reloadBookings={reloadBookings}
         />
       )}
     </div>
@@ -459,13 +461,19 @@ const BookingDetails = ({
   calculateLateCharges,
   statusMessage,
   chargeTypes,
-  BookingStatus // Receive BookingStatus as a prop
+  BookingStatus
 }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
       <div className="">
         <div className="flex justify-between items-center mb-6 border-b pb-3">
           <h3 className="text-xl font-bold text-indigo-900">Booking Details</h3>
+          <Link to="/trackvehicle">
+  <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 ease-in-out">
+    <FaMapMarkerAlt className="text-white text-lg" />
+    <span className="text-base font-semibold">Track Vehicle</span>
+  </button>
+</Link>
           {selectedBooking && selectedBooking.status === 'COMPLETED' && (
             <button
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -520,10 +528,6 @@ const BookingDetails = ({
                   ₹{(selectedBooking.vehiclePackage.price * 0.18).toFixed(2)}
                 </span>
               </div>
-              {/* <div className="flex justify-between mb-2">
-                <span className="text-gray-600">Convenience Fee:</span>
-                <span className="font-medium">₹2.00</span>
-              </div> */}
               <div className="flex justify-between mb-2">
                 <span className="text-gray-600">Late Charges:</span>
                 <span className="font-medium">₹{calculateLateCharges()}</span>
@@ -815,21 +819,29 @@ const AllBookingsList = ({
   totalPages,
   filteredData,
   handleView,
-  indexOfFirstItem, // Receive indexOfFirstItem as a prop
-  indexOfLastItem, // Receive indexOfLastItem as a prop
-  reloadBookings // Receive reloadBookings as a prop
+  indexOfFirstItem,
+  indexOfLastItem,
+  reloadBookings
 }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mb-6 mt-2">
         <h3 className="text-xl font-bold text-indigo-900">All Bookings</h3>
-        <input
-          type="text"
-          placeholder="Search by vehicle name..."
-          className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            placeholder="Search by vehicle name..."
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 text-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button
+            className="px-4 py-2 bg-indigo-800 text-white rounded-md hover:bg-indigo-700 transition-colors"
+            onClick={reloadBookings}
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto shadow-md rounded-lg">
@@ -915,7 +927,7 @@ const AllBookingsList = ({
             disabled={currentPage === 1}
             onClick={async () => {
               setCurrentPage((prev) => prev - 1);
-              await reloadBookings(); // Reload the bookings after changing the page
+              await reloadBookings();
             }}
           >
             Previous
@@ -931,7 +943,7 @@ const AllBookingsList = ({
                 } transition-colors`}
                 onClick={async () => {
                   setCurrentPage(index + 1);
-                  await reloadBookings(); // Reload the bookings after changing the page
+                  await reloadBookings();
                 }}
               >
                 {index + 1}
@@ -949,7 +961,7 @@ const AllBookingsList = ({
                   } transition-colors`}
                   onClick={async () => {
                     setCurrentPage(index + 1);
-                    await reloadBookings(); // Reload the bookings after changing the page
+                    await reloadBookings();
                   }}
                 >
                   {index + 1}
@@ -960,7 +972,7 @@ const AllBookingsList = ({
                 <button
                   className="px-3 py-1.5 rounded-md text-sm bg-indigo-800 text-white"
                   onClick={async () => {
-                    await reloadBookings(); // Reload the bookings after changing the page
+                    await reloadBookings();
                   }}
                 >
                   {currentPage}
@@ -977,7 +989,7 @@ const AllBookingsList = ({
                   } transition-colors`}
                   onClick={async () => {
                     setCurrentPage(totalPages - 2 + index);
-                    await reloadBookings(); // Reload the bookings after changing the page
+                    await reloadBookings();
                   }}
                 >
                   {totalPages - 2 + index}
@@ -989,7 +1001,7 @@ const AllBookingsList = ({
             disabled={currentPage === totalPages}
             onClick={async () => {
               setCurrentPage((prev) => prev + 1);
-              await reloadBookings(); // Reload the bookings after changing the page
+              await reloadBookings();
             }}
             className="px-3 py-1.5 text-sm rounded-md bg-indigo-800 text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
           >

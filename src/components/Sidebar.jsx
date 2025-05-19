@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoLayersOutline, IoPricetagsOutline } from "react-icons/io5";
-import { LuBox, LuUsers2, LuChevronRight, LuMenu, LuCalendarClock } from "react-icons/lu";
+import { LuBox, LuUsers, LuChevronRight, LuMenu, LuCalendarClock } from "react-icons/lu";
 import { RiMotorbikeLine, RiServiceLine } from "react-icons/ri";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MdOutlineLocalGroceryStore, MdSell } from "react-icons/md";
@@ -126,7 +126,7 @@ const Sidebar = () => {
       ],
     },
     { id: 6, path: "/dashboard/allOffers", name: "All Offers", icon: IoPricetagsOutline },
-    { id: 9, path: "/dashboard/allRegisterCustomers", name: "All Registered Customers", icon: LuUsers2 },
+    { id: 9, path: "/dashboard/allRegisterCustomers", name: "All Registered Customers", icon: LuUsers },
     { id: 11, path: "/dashboard/timeSlot", name: "Time Slot", icon: LuCalendarClock },
     { id: 12, name: "Sell Bikes", icon: MdSell,
       submenu: [
