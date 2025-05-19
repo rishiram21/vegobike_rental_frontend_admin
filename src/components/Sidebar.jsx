@@ -127,6 +127,7 @@ const Sidebar = () => {
     },
     { id: 6, path: "/dashboard/allOffers", name: "All Offers", icon: IoPricetagsOutline },
     { id: 9, path: "/dashboard/allRegisterCustomers", name: "All Registered Customers", icon: LuUsers },
+    { id: 9, path: "/dashboard/storeManger", name: "All Store Managers", icon: LuUsers },
     { id: 11, path: "/dashboard/timeSlot", name: "Time Slot", icon: LuCalendarClock },
     { id: 12, name: "Sell Bikes", icon: MdSell,
       submenu: [

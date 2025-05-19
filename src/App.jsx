@@ -21,6 +21,7 @@ import BikeServices from "./pages/BikeServices";
 import SpareParts from "./pages/SpareParts";
 import ServiceOrders from "./components/ServiceOrders";
 import TrackVehicle from "./pages/TrackVehicle";
+import StoreManagers from "./pages/StoreManagers";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="masterRecords/allBrands" element={<AllBrands />}></Route>
           <Route path="masterRecords/allModels" element={<AllModels />}></Route>
           <Route path="allRegisterCustomers" element={<AllRegisterCustomers />}></Route>
+          <Route path="storeManger" element={<StoreManagers />}></Route>
           <Route path="allReport/bookingReport" element={<BookingReport />}></Route>
           <Route path="allReport/gstReport" element={<GstReport />}></Route>
           <Route path="allReport/salesReport" element={<SalesReport />}></Route>
