@@ -242,19 +242,24 @@ const StoreMaster = () => {
               <div className="col-span-1">
                 <label className="block mb-2 font-medium">Contact Number</label>
                 <input
-                  type="tel"
-                  maxLength={12}
-                  name="storeContactNumber"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  value={formData.storePhone}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      storePhone: e.target.value,
-                    })
-                  }
-                  required
-                />
+  type="tel"
+  maxLength={10}
+  name="storeContactNumber"
+  className="w-full border border-gray-300 p-2 rounded"
+  value={formData.storePhone}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Allow only digits (0-9)
+    if (/^\d*$/.test(value)) {
+      setFormData({
+        ...formData,
+        storePhone: value,
+      });
+    }
+  }}
+  required
+/>
+
               </div>
               <div className="col-span-1">
                 <label className="block mb-2 font-medium">Address</label>

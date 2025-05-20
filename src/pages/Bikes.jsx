@@ -819,6 +819,14 @@ const Bikes = () => {
   const [itemsPerPage] = useState(7);
   const [totalPages, setTotalPages] = useState(1);
 
+  const fuelTypes = [
+    { id: 1, name: "PETROL" },
+    { id: 2, name: "DIESEL" },
+    { id: 3, name: "CNG" },
+    { id: 4, name: "ELECTRIC" },
+    { id: 5, name: "PETROL_CNG" },
+  ];
+
   const [formData, setFormData] = useState({
     vehicleBrandId: "",
     vehicleCategoryId: "",
@@ -936,7 +944,7 @@ const Bikes = () => {
 
   const fetchStores = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/store/all");
+      const response = await apiClient.get("/store/all");
       setStores(response.data.content);
     } catch (error) {
       console.error("Error fetching stores data:", error);
@@ -964,8 +972,8 @@ const Bikes = () => {
     let file2 = new File([blob2], { type: "pdf" });
 
     try {
-      const response = await axios.put(
-        `http://localhost:8080/vehicle/${editingId}`,
+      const response = await apiClient.put(
+        `/vehicle/${editingId}`,
         { ...formData, pucPdfFile: file, insurancePdfFile : file1,  documentPdfFile: file2},
         {
           headers: {
@@ -1013,8 +1021,8 @@ const Bikes = () => {
   };
 
   const handleDeleteBike = (id) => {
-    axios
-      .delete(`http://localhost:8080/bike/${id}`)
+    apiClient
+      .delete(`/bike/${id}`)
       .then(() => setData(data.filter((bike) => bike.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => {
@@ -1095,10 +1103,10 @@ const Bikes = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      
+
       <div className="flex justify-between items-center mt-4 mb-4">
         {/* <h1 className="text-2xl font-bold text-gray-800">All Bikes</h1> */}
-        
+
       </div>
 
       {formVisible ? (
@@ -1255,6 +1263,28 @@ const Bikes = () => {
                   {stores.map((store) => (
                     <option key={store.id} value={store.id}>
                       {store.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-1">
+                <label className="block mb-2 font-medium">Fuel Type *</label>
+                <select
+                  name="fuelType"
+                  className="border p-2 rounded w-full"
+                  value={formData.fuelType}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      fuelType: e.target.value,
+                    })
+                  }
+                  required
+                >
+                  <option value="" disabled>Select Fuel Type</option>
+                  {fuelTypes.map((fuel) => (
+                    <option key={fuel.id} value={fuel.name}>
+                      {fuel.name}
                     </option>
                   ))}
                 </select>
@@ -1560,3 +1590,4 @@ const Bikes = () => {
 };
 
 export default Bikes;
+

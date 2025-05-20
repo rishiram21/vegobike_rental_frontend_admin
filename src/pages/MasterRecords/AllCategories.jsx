@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import apiClient from "../../api/apiConfig";
 
 const AllCategories = () => {
   const [data, setData] = useState([]);
@@ -19,7 +20,7 @@ const AllCategories = () => {
     const fetchCategory = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:8080/category/all", {
+        const response = await apiClient.get("/category/all", {
           params: {
             page: currentPage - 1, // Backend expects 0-indexed page
             size: itemsPerPage, // Number of items per page
@@ -44,8 +45,8 @@ const AllCategories = () => {
   // Add Category
   const handleAddCategory = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:8080/category/add", formData)
+    apiClient
+      .post("/category/add", formData)
       .then((response) => {
         setData([...data, response.data]); // Add new category to data
         resetForm();
@@ -58,8 +59,8 @@ const AllCategories = () => {
   // Edit Category
   const handleSaveEditCategory = (e) => {
     e.preventDefault();
-    axios
-      .put(`http://localhost:8080/category/${editingId}`, formData)
+    apiClient
+      .put(`/category/${editingId}`, formData)
       .then((response) => {
         setData(
           data.map((category) =>
@@ -87,8 +88,8 @@ const AllCategories = () => {
   // Delete Category
   const handleDeleteCategory = (id) => {
     console.log("Deleting category with ID:", id);
-    axios
-      .delete(`http://localhost:8080/category/${id}`)
+    apiClient
+      .delete(`/category/${id}`)
       .then(() => {
         // Remove the deleted category from the state
         setData(data.filter((category) => category.id !== id));

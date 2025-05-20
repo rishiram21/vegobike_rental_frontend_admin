@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import apiClient from "../../api/apiConfig";
 
 const AllModels = () => {
   const [data, setData] = useState([]);
@@ -22,7 +23,7 @@ const AllModels = () => {
     const fetchModels = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:8080/model/all");
+        const response = await apiClient.get("/model/all");
         if (Array.isArray(response.data.content)) {
           setData(response.data.content);
         } else {
@@ -44,7 +45,7 @@ const AllModels = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/brand/all");
+        const response = await apiClient.get("/brand/all");
         setBrands(response.data.content);
       } catch (error) {
         console.error("Error fetching brand data:", error);
@@ -56,8 +57,8 @@ const AllModels = () => {
   // Add Model
   const handledAddModel = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:8080/model/add", formData)
+    apiClient
+      .post("/model/add", formData)
       .then((response) => {
         if (!Array.isArray(data)) {
           setData([response.data]);
@@ -72,8 +73,8 @@ const AllModels = () => {
   // Save Edit
   const handleSaveEditModel = (e) => {
     e.preventDefault();
-    axios
-      .put(`http://localhost:8080/model/${editingId}`, formData)
+    apiClient
+      .put(`/model/${editingId}`, formData)
       .then((response) => {
         setData(
           data.map((model) => (model.id === editingId ? response.data : model))
@@ -95,8 +96,8 @@ const AllModels = () => {
 
   // Delete Model
   const handleDeleteModel = (id) => {
-    axios
-      .delete(`http://localhost:8080/model/${id}`)
+    apiClient
+      .delete(`/model/${id}`)
       .then(() => setData(data.filter((model) => model.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => setConfirmDeleteId(null));

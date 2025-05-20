@@ -90,7 +90,7 @@ const StoreManagers = () => {
 
   const fetchStores = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/store/all");
+      const response = await apiClient.get("/store/all");
       setStores(response.data.content);
     } catch (error) {
       console.error("Error fetching stores data:", error);
@@ -106,8 +106,8 @@ const StoreManagers = () => {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
-        `http://localhost:8080/admin/storeManagers/${editingId}`,
+      const response = await apiClient.put(
+        `/admin/storeManagers/${editingId}`,
         formData,
         // {
         //   headers: {
@@ -140,8 +140,8 @@ const StoreManagers = () => {
   };
 
   const handleDeleteStoreManager = (id) => {
-    axios
-      .delete(`http://localhost:8080/admin/storeManagers/${id}`)
+    apiClient
+      .delete(`/admin/storeManagers/${id}`)
       .then(() => setData(data.filter((manager) => manager.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => setConfirmDeleteId(null));

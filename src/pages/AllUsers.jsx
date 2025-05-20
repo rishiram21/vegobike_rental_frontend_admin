@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit } from "react-icons/fa";
+import apiClient from "../api/apiConfig";
 
 const AllUsers = () => {
   const [data, setData] = useState([]);
@@ -26,8 +27,8 @@ const AllUsers = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/users/list"
+        const response = await apiClient.get(
+          "/api/users/list"
         );
         setData(response.data);
         setStatuses(
@@ -47,7 +48,7 @@ const AllUsers = () => {
     e.preventDefault();
 
     axios
-      .post("http://localhost:8080/api/users/save", formData)
+      .post("/api/users/save", formData)
       .then((response) => {
         setData([...data, response.data]);
         resetForm();
@@ -59,7 +60,7 @@ const AllUsers = () => {
   const handleSaveEditUser = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:8080/api/users/${editingId}`, formData)
+      .put(`/api/users/${editingId}`, formData)
       .then((response) => {
         setData(
           data.map((user) => (user.id === editingId ? response.data : user))
@@ -86,7 +87,7 @@ const AllUsers = () => {
   //Delete user
   const handleDeleteUser = (id) => {
     axios
-      .delete(`http://localhost:8080/api/users/${id}`)
+      .delete(`/api/users/${id}`)
       .then(() => setData(data.filter((user) => user.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => setConfirmDeleteId(null));

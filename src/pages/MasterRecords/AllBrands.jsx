@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import apiClient from "../../api/apiConfig";
 
 function convertImageToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -40,7 +41,7 @@ const AllBrands = () => {
     const fetchBrand = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:8080/brand/all");
+        const response = await apiClient.get("/brand/all");
         console.log("fetched brand data:", response.data);
         if (response.data && response.data.content) {
           setData(response.data.content); // Save the full dataset
@@ -98,8 +99,8 @@ const AllBrands = () => {
   const handledAddBrand = (e) => {
     e.preventDefault();
     console.log(formData);
-    axios
-      .post("http://localhost:8080/brand/add", formData)
+    apiClient
+      .post("/brand/add", formData)
       .then((response) => {
         setData([...data, response.data]);
         resetForm();
@@ -110,8 +111,8 @@ const AllBrands = () => {
   // Save Edit
   const handleSaveEditBrand = (e) => {
     e.preventDefault();
-    axios
-      .put(`http://localhost:8080/brand/${editingId}`, formData)
+    apiClient
+      .put(`/brand/${editingId}`, formData)
       .then((response) => {
         const updatedData = data.map((brand) =>
           brand.id === editingId ? response.data : brand
@@ -141,8 +142,8 @@ const AllBrands = () => {
 
   // Delete Brand
   const handleDeleteBrand = (id) => {
-    axios
-      .delete(`http://localhost:8080/brand/${id}`)
+    apiClient
+      .delete(`/brand/${id}`)
       .then(() => {
         const updatedData = data.filter((brand) => brand.id !== id);
         setData(updatedData);

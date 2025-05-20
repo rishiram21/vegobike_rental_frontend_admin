@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { toast } from "react-toastify";
+import apiClient from "../../api/apiConfig";
 
 const PickUpTariffPlan = () => {
   const [data, setData] = useState([]);
@@ -25,7 +26,7 @@ const PickUpTariffPlan = () => {
   const fetchPickUpTariffPrices = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8080/package/all");
+      const response = await apiClient.get("/package/all");
       if (Array.isArray(response.data.content)) {
         setData(response.data.content);
       } else {
@@ -52,8 +53,8 @@ const PickUpTariffPlan = () => {
       hours: formData.periodType === "Hours" ? Number(formData.periodValue) : 0,
       days: formData.periodType === "Days" ? Number(formData.periodValue) : 0,
     };
-    axios
-      .post("http://localhost:8080/package/add", payload)
+    apiClient
+      .post("/package/add", payload)
       .then(() => {
         fetchPickUpTariffPrices();
         resetForm();
@@ -63,7 +64,7 @@ const PickUpTariffPlan = () => {
 
   const fetchCategory = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/category/all");
+      const response = await apiClient.get("/category/all");
       setCategories(response.data.content);
     } catch (error) {
       console.error("Error fetching category data:", error);
@@ -79,8 +80,8 @@ const PickUpTariffPlan = () => {
       hours: formData.periodType === "Hours" ? Number(formData.periodValue) : 0,
       days: formData.periodType === "Days" ? Number(formData.periodValue) : 0,
     };
-    axios
-      .put(`http://localhost:8080/package/${editingId}`, payload)
+    apiClient
+      .put(`/package/${editingId}`, payload)
       .then(() => {
         fetchPickUpTariffPrices();
         resetForm();
@@ -102,7 +103,7 @@ const PickUpTariffPlan = () => {
 
   const handleToggleStatus = async (id) => {
     try {
-      await axios.put(`http://localhost:8080/package/toggle/${id}`);
+      await apiClient.put(`/package/toggle/${id}`);
       toast.success("Status updated successfully");
       fetchPickUpTariffPrices();
     } catch (error) {
