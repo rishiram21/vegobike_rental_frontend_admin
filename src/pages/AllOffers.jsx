@@ -48,13 +48,37 @@ const Allcoupons = () => {
     fetchCoupons();
   }, [currentPage]);
 
+  const validateDates = (startDate, endDate) => {
+    const currentDate = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (start < currentDate) {
+      alert("Start date cannot be in the past.");
+      return false;
+    }
+
+    if (end < start) {
+      alert("End date must be after the start date.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handledAddcoupon = (e) => {
     e.preventDefault();
+
+    if (!validateDates(formData.startDate, formData.endDate)) {
+      return; // Stop execution if dates are invalid
+    }
+
     const updatedFormData = {
       ...formData,
-      couponType: formData.couponType || "FIXED_VALUE", // Default value
-      isActive: formData.isActive ?? true, // Ensure isActive is not null
+      couponType: formData.couponType || "FIXED_VALUE",
+      isActive: formData.isActive ?? true,
     };
+
     apiClient
       .post("/coupons/add", updatedFormData)
       .then((response) => {
@@ -67,6 +91,11 @@ const Allcoupons = () => {
 
   const handleSaveEditCoupon = (e) => {
     e.preventDefault();
+
+    if (!validateDates(formData.startDate, formData.endDate)) {
+      return; // Stop execution if dates are invalid
+    }
+
     apiClient
       .put(`/coupons/updateId/${editingId}`, formData)
       .then((response) => {
@@ -213,7 +242,8 @@ const Allcoupons = () => {
               <div className="col-span-1">
                 <label className="block mb-2 font-medium">Discount Value *</label>
                 <input
-                  type="text"
+                  type="tel"
+                  maxLength={7}
                   name="discountValue"
                   className="w-full border border-gray-300 p-2 rounded"
                   value={formData.discountValue}
@@ -231,7 +261,8 @@ const Allcoupons = () => {
                   Minimum Ride Amount *
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  maxLength={6}
                   name="minimumRideAmount"
                   className="w-full border border-gray-300 p-2 rounded"
                   value={formData.minimumRideAmount}
@@ -249,7 +280,8 @@ const Allcoupons = () => {
                   Total Coupons *
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  maxLength={6}
                   name="totalCoupon"
                   className="w-full border border-gray-300 p-2 rounded"
                   value={formData.totalCoupon}
@@ -267,7 +299,8 @@ const Allcoupons = () => {
                   Remaining Coupons <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  maxLength={6}
                   name="remainingCoupon"
                   className="w-full border border-gray-300 p-2 rounded"
                   value={formData.remainingCoupon}

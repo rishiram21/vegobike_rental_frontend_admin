@@ -28,6 +28,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />}></Route>
+        <Route path="/trackvehicle" element={<TrackVehicle />}></Route>
         <Route path="/dashboard" element={<Layout />}>
           <Route index element={<Home />}></Route>
           <Route path="allBikes" element={<Bikes />}></Route>
@@ -39,7 +40,7 @@ function App() {
           <Route path="bikeServices" element={<BikeServices />}></Route>
           <Route path="spareParts" element={<SpareParts />}></Route>
           <Route path="serviceOrders" element={<ServiceOrders />}></Route>
-          <Route path="trackvehicle" element={<TrackVehicle />}></Route>
+          
           
 
           {/* Submenu Routes  */}

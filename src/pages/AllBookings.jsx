@@ -1026,6 +1026,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { Plus, Trash2 } from 'lucide-react';
 import ImageDetail from './ImageDetail';
 import Invoice from './Invoice';
+import { Link } from 'react-router-dom';
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 const AllBookings = () => {
   const BookingStatus = {
@@ -1435,6 +1437,12 @@ const BookingDetails = ({
       <div className="">
         <div className="flex justify-between items-center mb-6 border-b pb-3">
           <h3 className="text-xl font-bold text-indigo-900">Booking Details</h3>
+          <Link to="/trackvehicle">
+            <button className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-2xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 ease-in-out">
+              <FaMapMarkerAlt className="text-white text-lg" />
+              <span className="text-base font-semibold">Track Vehicle</span>
+            </button>
+          </Link>
           {selectedBooking && selectedBooking.status === 'COMPLETED' && (
             <button
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
