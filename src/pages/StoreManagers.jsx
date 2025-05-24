@@ -1,17 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { BASE_URL } from "../api/api";
 import apiClient from "../api/apiConfig";
-
-function convertImageToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-    reader.readAsDataURL(file);
-  });
-}
 
 const StoreManagers = () => {
   const [data, setData] = useState([]);
@@ -24,14 +14,14 @@ const StoreManagers = () => {
   const [loading, setLoading] = useState(true);
   const [itemsPerPage] = useState(7);
   const [totalPages, setTotalPages] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    contactNumber: "",
+    phoneNumber: "",
     storeId: "",
     password: "",
-    // identityProof: "",
   });
 
   const fetchStoreManagers = async () => {
@@ -52,66 +42,31 @@ const StoreManagers = () => {
     }
   };
 
-  // const handleAddStoreManager = (e) => {
-  //   e.preventDefault();
-  //   apiClient
-  //     .post("/admin/createStoreManager", formData,
-  //   //      {
-  //   //     headers: {
-  //   //       "Content-Type": "multipart/form-data",
-  //   //     },
-  //   //   }
-  //   )
-  //     .then((response) => {
-  //       setData([...data, response.data]);
-  //       resetForm();
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error Adding Store Manager Data", error);
-  //     });
-  // };
-
-
   const handleAddStoreManager = (e) => {
-  e.preventDefault();
-  console.log("Form Data:", formData); // Debugging line
-  if (!formData.storeId) {
-    alert("Please select a store.");
-    return;
-  }
-  apiClient
-    .post("/admin/createStoreManager", formData)
-    .then((response) => {
-      setData([...data, response.data]);
-      resetForm();
-    })
-    .catch((error) => {
-      console.error("Error Adding Store Manager Data", error);
-    });
-};
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    const maxFileSize = 3 * 1024 * 1024; // 3 MB in bytes
-
-    if (file) {
-      if (file.size > maxFileSize) {
-        alert("File size should not exceed 3 MB");
-        return;
-      }
-
-      setFormData({
-        ...formData,
-        [e?.target?.name]: file,
+    e.preventDefault();
+    setIsSubmitting(true);
+    console.log("Form Data:", formData);
+    apiClient
+      .post("/admin/createStoreManager", formData)
+      .then((response) => {
+        console.log("Store Manager Added:", response.data);
+        setData([...data, response.data]);
+        resetForm();
+        fetchStoreManagers().then(() => {
+          setIsSubmitting(false);
+        });
+      })
+      .catch((error) => {
+        console.error("Error Adding Store Manager Data", error);
+        setIsSubmitting(false);
       });
-    }
   };
 
   const fetchStores = async () => {
     try {
-      const response = await apiClient.get("/store/all");
+      const response = await axios.get("http://localhost:8080/store/all");
       setStores(response.data.content);
-      console.log("Fetched Stores:", response.data.content); 
+      console.log("Fetched stores:", response.data.content);
     } catch (error) {
       console.error("Error fetching stores data:", error);
     }
@@ -119,58 +74,30 @@ const StoreManagers = () => {
 
   const getStoreName = (storeId) => {
     const store = stores.find((s) => s.id === storeId);
-    console.log("Store ID:", storeId, "Store:", store);
-    return store ? store.name : "Unknown Store";
+    const storeName = store ? store.name : "Unknown Store";
+    console.log("Store ID:", storeId, "Store Name:", storeName);
+    return storeName;
   };
 
-
-  // const handleSaveEdit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const response = await apiClient.put(
-  //       `/admin/storeManagers/${editingId}`,
-  //       formData,
-  //       // {
-  //       //   headers: {
-  //       //     "Content-Type": "multipart/form-data",
-  //       //   },
-  //       // }
-  //     );
-
-  //     setData((prevData) =>
-  //       prevData.map((manager) => (manager.id === editingId ? response.data : manager))
-  //     );
-
-  //     resetForm();
-  //   } catch (error) {
-  //     console.error("Error saving data:", error);
-  //   }
-  // };
-
-
   const handleSaveEdit = async (e) => {
-  e.preventDefault();
-  console.log("Form Data:", formData); // Debugging line
-  if (!formData.storeId) {
-    alert("Please select a store.");
-    return;
-  }
-  try {
-    const response = await apiClient.put(
-      `/admin/storeManagers/${editingId}`,
-      formData
-    );
+    e.preventDefault();
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/admin/storeManagers/${editingId}`,
+        formData
+      );
 
-    setData((prevData) =>
-      prevData.map((manager) => (manager.id === editingId ? response.data : manager))
-    );
+      setData((prevData) =>
+        prevData.map((manager) =>
+          manager.id === editingId ? response.data : manager
+        )
+      );
 
-    resetForm();
-  } catch (error) {
-    console.error("Error saving data:", error);
-  }
-};
-
+      resetForm();
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
 
   const handleEditStoreManager = (manager) => {
     setEditingId(manager.id);
@@ -179,48 +106,34 @@ const StoreManagers = () => {
       email: manager.email,
       phoneNumber: manager.phoneNumber,
       storeId: manager.storeId,
-      password: "", // Do not pre-fill password for security reasons
-    //   identityProof: manager.identityProof,
+      password: "",
     });
     setFormVisible(true);
   };
 
   const handleDeleteStoreManager = (id) => {
-    apiClient
-      .delete(`/admin/storeManagers/${id}`)
+    axios
+      .delete(`http://localhost:8080/admin/storeManagers/${id}`)
       .then(() => setData(data.filter((manager) => manager.id !== id)))
       .catch((error) => console.error("Error deleting data:", error))
       .finally(() => setConfirmDeleteId(null));
   };
 
-  // const resetForm = () => {
-  //   setEditingId(null);
-  //   setFormData({
-  //     name: "",
-  //     email: "",
-  //     phoneNumber: "",
-  //     storeId: "",
-  //     password: "",
-  //   //   identityProof: "",
-  //   });
-  //   setFormVisible(false);
-  // };
-
   const resetForm = () => {
-  setEditingId(null);
-  setFormData({
-    name: "",
-    email: "",
-    phoneNumber: "",
-    storeId: "", // Ensure storeId is set to an empty string or a default value
-    password: "",
-  });
-  setFormVisible(false);
-};
+    setEditingId(null);
+    setFormData({
+      name: "",
+      email: "",
+      phoneNumber: "",
+      storeId: "",
+      password: "",
+    });
+    setFormVisible(false);
+    console.log("Form Reset and Visibility Set to False");
+  };
 
   const filteredData = data.filter(
-    (item) =>
-      item.name && item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (item) => item.name && item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -291,7 +204,7 @@ const StoreManagers = () => {
                 <label className="font-medium">Contact Number *</label>
                 <input
                   type="text"
-                  name="contactNumber"
+                  name="phoneNumber"
                   placeholder="Enter Contact Number"
                   value={formData.phoneNumber}
                   onChange={(e) =>
@@ -341,35 +254,15 @@ const StoreManagers = () => {
                   required
                 />
               </div>
-              {/* <div className="mb-4">
-                <label className="block mb-2 font-medium">Upload Identity Proof</label>
-                <input
-                  type="file"
-                  name="identityProof"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  onChange={handleFileUpload}
-                  required
-                />
-                {formData.identityProof && (
-                  <div className="mt-2">
-                    <div className="w-[90px] h-[90px] border border-gray-300 rounded flex items-center justify-center overflow-hidden">
-                      <img
-                        src={formData.identityProof}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div> */}
             </div>
 
             <div className="mt-4">
               <button
                 type="submit"
                 className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-600"
+                disabled={isSubmitting}
               >
-                {editingId ? "Save" : "Add"}
+                {isSubmitting ? "Adding..." : editingId ? "Save" : "Add"}
               </button>
               <button
                 type="button"
@@ -414,9 +307,9 @@ const StoreManagers = () => {
                   <th scope="col" className="px-6 py-3">
                     Store Name
                   </th>
-                  <th scope="col" className="px-6 py-3">
+                  {/* <th scope="col" className="px-6 py-3">
                     Verify
-                  </th>
+                  </th> */}
                   <th scope="col" className="px-6 py-3">
                     Action
                   </th>
@@ -437,7 +330,6 @@ const StoreManagers = () => {
                   </tr>
                 ) : (
                   currentData?.map((manager, index) => (
-                    
                     <tr
                       key={manager?.id}
                       className="bg-white border-b hover:bg-gray-50"
@@ -447,8 +339,10 @@ const StoreManagers = () => {
                       <td className="px-6 py-4">{manager?.email}</td>
                       <td className="px-6 py-4">{manager?.phoneNumber}</td>
                       <td className="px-6 py-4">{getStoreName(manager?.storeId)}</td>
-                      {/* <td className="px-6 py-4">{manager?.verify ? "Verified" : "Not Verified"}</td> */}
-                      <td className="px-6 py-4 ">
+                      {/* <td className="px-6 py-4">
+                        {manager?.verify ? "Verified" : "Not Verified"}
+                      </td> */}
+                      <td className="px-6 py-4">
                         <div className="flex items-center space-x-4">
                           <button
                             className="px-4 py-2 flex items-center text-white bg-blue-800 hover:bg-blue-600 rounded"
@@ -457,13 +351,13 @@ const StoreManagers = () => {
                             <FaEdit className="mr-2" />
                             Edit
                           </button>
-                          <button
+                          {/* <button
                             className="px-4 py-2 flex items-center text-white bg-red-500 hover:bg-red-600 rounded"
                             onClick={() => setConfirmDeleteId(manager.id)}
                           >
                             <FaTrash className="mr-2" />
                             Delete
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
