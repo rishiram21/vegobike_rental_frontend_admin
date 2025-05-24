@@ -52,24 +52,43 @@ const StoreManagers = () => {
     }
   };
 
+  // const handleAddStoreManager = (e) => {
+  //   e.preventDefault();
+  //   apiClient
+  //     .post("/admin/createStoreManager", formData,
+  //   //      {
+  //   //     headers: {
+  //   //       "Content-Type": "multipart/form-data",
+  //   //     },
+  //   //   }
+  //   )
+  //     .then((response) => {
+  //       setData([...data, response.data]);
+  //       resetForm();
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error Adding Store Manager Data", error);
+  //     });
+  // };
+
+
   const handleAddStoreManager = (e) => {
-    e.preventDefault();
-    apiClient
-      .post("/admin/createStoreManager", formData,
-    //      {
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   }
-    )
-      .then((response) => {
-        setData([...data, response.data]);
-        resetForm();
-      })
-      .catch((error) => {
-        console.error("Error Adding Store Manager Data", error);
-      });
-  };
+  e.preventDefault();
+  console.log("Form Data:", formData); // Debugging line
+  if (!formData.storeId) {
+    alert("Please select a store.");
+    return;
+  }
+  apiClient
+    .post("/admin/createStoreManager", formData)
+    .then((response) => {
+      setData([...data, response.data]);
+      resetForm();
+    })
+    .catch((error) => {
+      console.error("Error Adding Store Manager Data", error);
+    });
+};
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -92,6 +111,7 @@ const StoreManagers = () => {
     try {
       const response = await apiClient.get("/store/all");
       setStores(response.data.content);
+      console.log("Fetched Stores:", response.data.content); 
     } catch (error) {
       console.error("Error fetching stores data:", error);
     }
@@ -99,32 +119,58 @@ const StoreManagers = () => {
 
   const getStoreName = (storeId) => {
     const store = stores.find((s) => s.id === storeId);
+    console.log("Store ID:", storeId, "Store:", store);
     return store ? store.name : "Unknown Store";
   };
 
 
+  // const handleSaveEdit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await apiClient.put(
+  //       `/admin/storeManagers/${editingId}`,
+  //       formData,
+  //       // {
+  //       //   headers: {
+  //       //     "Content-Type": "multipart/form-data",
+  //       //   },
+  //       // }
+  //     );
+
+  //     setData((prevData) =>
+  //       prevData.map((manager) => (manager.id === editingId ? response.data : manager))
+  //     );
+
+  //     resetForm();
+  //   } catch (error) {
+  //     console.error("Error saving data:", error);
+  //   }
+  // };
+
+
   const handleSaveEdit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await apiClient.put(
-        `/admin/storeManagers/${editingId}`,
-        formData,
-        // {
-        //   headers: {
-        //     "Content-Type": "multipart/form-data",
-        //   },
-        // }
-      );
+  e.preventDefault();
+  console.log("Form Data:", formData); // Debugging line
+  if (!formData.storeId) {
+    alert("Please select a store.");
+    return;
+  }
+  try {
+    const response = await apiClient.put(
+      `/admin/storeManagers/${editingId}`,
+      formData
+    );
 
-      setData((prevData) =>
-        prevData.map((manager) => (manager.id === editingId ? response.data : manager))
-      );
+    setData((prevData) =>
+      prevData.map((manager) => (manager.id === editingId ? response.data : manager))
+    );
 
-      resetForm();
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
-  };
+    resetForm();
+  } catch (error) {
+    console.error("Error saving data:", error);
+  }
+};
+
 
   const handleEditStoreManager = (manager) => {
     setEditingId(manager.id);
@@ -147,18 +193,30 @@ const StoreManagers = () => {
       .finally(() => setConfirmDeleteId(null));
   };
 
+  // const resetForm = () => {
+  //   setEditingId(null);
+  //   setFormData({
+  //     name: "",
+  //     email: "",
+  //     phoneNumber: "",
+  //     storeId: "",
+  //     password: "",
+  //   //   identityProof: "",
+  //   });
+  //   setFormVisible(false);
+  // };
+
   const resetForm = () => {
-    setEditingId(null);
-    setFormData({
-      name: "",
-      email: "",
-      phoneNumber: "",
-      storeId: "",
-      password: "",
-    //   identityProof: "",
-    });
-    setFormVisible(false);
-  };
+  setEditingId(null);
+  setFormData({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    storeId: "", // Ensure storeId is set to an empty string or a default value
+    password: "",
+  });
+  setFormVisible(false);
+};
 
   const filteredData = data.filter(
     (item) =>
@@ -379,6 +437,7 @@ const StoreManagers = () => {
                   </tr>
                 ) : (
                   currentData?.map((manager, index) => (
+                    
                     <tr
                       key={manager?.id}
                       className="bg-white border-b hover:bg-gray-50"
@@ -388,7 +447,7 @@ const StoreManagers = () => {
                       <td className="px-6 py-4">{manager?.email}</td>
                       <td className="px-6 py-4">{manager?.phoneNumber}</td>
                       <td className="px-6 py-4">{getStoreName(manager?.storeId)}</td>
-                      <td className="px-6 py-4">{manager?.verify ? "Verified" : "Not Verified"}</td>
+                      {/* <td className="px-6 py-4">{manager?.verify ? "Verified" : "Not Verified"}</td> */}
                       <td className="px-6 py-4 ">
                         <div className="flex items-center space-x-4">
                           <button
