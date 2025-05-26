@@ -150,7 +150,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Responsive Header Bar */}
-      <div className="fixed h-20 top-0 left-0 z-30 w-full bg-indigo-900 flex justify-between items-center px-4 py-4">
+      <div className="fixed h-16 top-0 left-0 z-30 w-full bg-indigo-900 flex justify-between items-center px-4 py-4">
         <div className="flex items-center">
           <button
             onClick={windowWidth < 768 ? toggleMenu : toggleDesktopSidebar}
@@ -199,7 +199,7 @@ const Sidebar = () => {
                     pt-16
                     ${isMenuOpen ? 'w-3/4 sm:w-64' : 'w-0'}`}
       >
-        <div className="flex-grow py-10 overflow-y-auto overflow-x-hidden scrollbar-hide">
+        <div className="flex-grow py-5 overflow-y-auto overflow-x-hidden scrollbar-hide">
           <div className="py-2 px-2">
             <ul className="space-y-1">
               {SIDEBAR_LINKS.map((link, index) => (
