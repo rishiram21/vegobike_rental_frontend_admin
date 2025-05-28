@@ -84,7 +84,7 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
           </div>
           <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-800 w-5/12">
             <h3 className="font-bold text-gray-700 mb-2 text-sm uppercase tracking-wider">Payment Details:</h3>
-            <p className="text-gray-600">Payment Mode: <span className="font-medium">{booking.paymentMode || "Cash On Center"}</span></p>
+            <p className="text-gray-600">Payment Mode: <span className="font-medium">{booking.paymentMethod || "Cash On Center"}</span></p>
             <p className="text-gray-600">Security Deposit: <span className="font-medium">₹{booking.vehiclePackage.deposit}</span></p>
             {/* <p className="text-gray-600">Payment ID: <span className="font-medium">{booking.paymentId || "N/A"}</span></p> */}
           </div>
