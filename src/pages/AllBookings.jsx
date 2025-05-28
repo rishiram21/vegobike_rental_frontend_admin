@@ -1497,10 +1497,10 @@ const BookingDetails = ({
                   ₹{(selectedBooking.vehiclePackage.price * 0.18).toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between mb-2">
+              {/* <div className="flex justify-between mb-2">
                 <span className="text-gray-600">Convenience Fee:</span>
                 <span className="font-medium">₹2.00</span>
-              </div>
+              </div> */}
               <div className="flex justify-between mb-2">
                 <span className="text-gray-600">Late Charges:</span>
                 <span className="font-medium">₹{calculateLateCharges()}</span>
@@ -1509,7 +1509,7 @@ const BookingDetails = ({
                 <div className="flex justify-between">
                   <span className="text-gray-600">Payment Mode:</span>
                   <span className="text-green-600 font-semibold">
-                    {selectedBooking.paymentMode || "Cash On Center"}
+                    {selectedBooking.paymentMethod || "Cash On Center"}
                   </span>
                 </div>
               </div>
