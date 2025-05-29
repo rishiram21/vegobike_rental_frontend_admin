@@ -49,13 +49,13 @@ const Invoice = ({ booking, charges, lateCharges = 0, challans = [], damages = [
           </div> */}
           <div className="flex items-center space-x-4">
             <img src="/vegologo.png" alt="VegoBike Logo" className="h-10 w-10" />
-          <h1 className="text-3xl font-bold tracking-tight">VegoBike</h1>
+          <h1 className="text-3xl font-bold tracking-tight">VeGoBike</h1>
           </div>
         </div>
         <div className="text-right">
           <h2 className="text-2xl font-bold tracking-wide uppercase">Invoice</h2>
           <div className="bg-indigo-700 px-3 py-1 rounded mt-1 inline-block">
-            <p className="text-indigo-100">OKB-{booking.bookingId}</p>
+            <p className="text-indigo-100">VEGO-{booking.bookingId}</p>
           </div>
         </div>
       </div>
